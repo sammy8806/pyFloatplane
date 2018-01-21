@@ -4,53 +4,67 @@ import logging
 import requests
 from datetime import timedelta, datetime
 import configparser
+import time
 
 FP_PROTO = 'https'
 FP_HOST = FP_PROTO + '://www.floatplane.com/api'
 
 FP_VIDEO_GET = 'https://linustechtips.com/main/applications/floatplane/interface'
+VALIDITY_PERIOD = 15
 
 FORMAT = '%(process)d %(processName)s %(asctime)-15s %(message)s'
 #logging.basicConfig(format=FORMAT, level=0)
 log = logging.getLogger('Floatplane')
 
+_cache = {}
+_timestamps = {}
+
 # TODO: Use decorators for caching?
+def normalize_key(key, *args, **kwargs):
+	log.debug("Key: {}".format(key))
+	log.debug("Args: {}".format(args))
+	log.debug("KwArgs: {}".format(kwargs))
 
-# TODO: Unused
-class FPCache:
-	def __init__(self, client):
-		self.client = client
-	pass
+	arg_str = ['']
+	for it in args:
+		it_str = '_'.join(map(str,it))
+		log.debug('>> {}'.format(it_str))
+		arg_str.append(it_str)
 
-# TODO: Unused
-class FPCacheEntry:
-	def __init__(self, value, lifetime=60, method=None):
-		self.lifetime = lifetime
-		self.setValue(value)
+	for key, value in kwargs:
+		arg_str.append('{}={}'.format(key, value))
 
-	def setValue(self, value):
-		self.value = value
-		self.lastCache = datetime.utcnow()
+	cache_key = (key +
+		'#' + '_'.join(arg_str)
+	)
 
-	def getValue():
-		now = datetime.utcnow()
-		if self.lastCache + self.lifetime > now:
-			return None
-		else:
-			return self.value
+	log.debug("CacheKey: {}".format(cache_key))
 
-# TODO: Unused
-class CreatorCache(FPCache):
-	def __init__(self, client):
-		super().__init__(client)
-		self.creatorCache = {}
+	return cache_key
 
-	def getByName(self, name):
-		pass
+def memorize(key):
+	def _decorating_wrapper(func):
+		def _caching_wrapper(*args, **kwargs):
+			cache_key = normalize_key(key, args, kwargs)
+			now = time.time()
 
-	def getById(self, id):
-		if id in self.creatorCache:
-			return 
+			log.debug('Cache: {}'.format(key))
+
+			# if cached and still valid -> use it
+			if _timestamps.get(cache_key, now) > now:
+				log.debug('Cache still valid')
+				return _cache[cache_key]
+
+			log.debug('Cache invalid ... running function')
+			ret = func(*args, **kwargs)
+
+			_cache[cache_key] = ret
+			_timestamps[cache_key] = now + VALIDITY_PERIOD
+
+			log.debug('Cache: Saving value until {}'.format(_timestamps[cache_key]))
+			return ret
+		return _caching_wrapper
+	return _decorating_wrapper
 
 class User:
 	def __init__(self, id=None, username=None, profileImage=None):
@@ -65,6 +79,9 @@ class User:
 	def generate(source):
 		if source is None or len(source) is 0:
 			return User()
+		if type(source) is str and len(source) > 0:
+			return User(id=source)
+
 		return User(source['id'], source['username'], source['profileImage'])
 
 class UserConnection:
@@ -210,6 +227,9 @@ class Video:
 		if source is None or len(source) is 0:
 			return Video()
 		
+		if type(source) is str and len(source) > 0:
+			return Video(title=source)
+
 		return Video(
 			source['title'], source['guid'], source['tags'], source['description'], source['private'],
 			source['releaseDate'], source['duration'], source['creator'], source['thumbnail']
@@ -224,22 +244,50 @@ class Playlist:
 		self.image = {} # Image
 
 class CommentInteraction:
-	def __init__(self):
-		self.like = 0 # Int
-		self.dislike = 0 # Int
+	def __init__(self, like=None, dislike=None):
+		self.like = like # Int
+		self.dislike = dislike # Int
 
-class Comments:
-	def __init__(self):
-		self.id = None # String : Id (Hash?)
-		self.user = None # User
-		self.video = None # Video
-		self.text = None # String
-		self.replying = None # null?
-		self.postDate = None # IsoTimestamp
-		self.editDate = None # IsoTimestamp
-		self.interactions = [] # ?
-		self.replies = [] # ?
-		self.interactionCounts = {} # CommentInteraction
+	@staticmethod
+	def generate(source):
+		if source is None or type(source) is str and len(source) is 0:
+			return CommentInteraction()
+
+		return CommentInteraction(source['like'], source['dislike'])
+
+class Comment:
+	def __init__(self, id=None, user=None, video=None, text=None, replying=None, postDate=None,
+		editDate=None, interactions=[], replies=[], interactionCounts={}):
+		if type(user) is dict or type(user) is str or creator is None:
+			user = User.generate(user)
+
+		if type(video) is dict or type(video) is str or video is None:
+			video = Video.generate(video)
+
+		if type(interactionCounts) is dict or type(interactionCounts) is str or interactionCounts is None:
+			interactionCounts = CommentInteraction.generate(interactionCounts)
+
+		self.id = id # String : Id (Hash?)
+		self.user = user # User
+		self.video = video # Video
+		self.text = text # String
+		self.replying = replying # null?
+		self.postDate = postDate # IsoTimestamp
+		self.editDate = editDate # IsoTimestamp
+		self.interactions = interactions # ?
+		self.replies = replies # ?
+		self.interactionCounts = interactionCounts # CommentInteraction
+	
+	@staticmethod
+	def generate(source):
+		if source is None or len(source) is 0:
+			return Comment()
+		
+		return Comment(
+			source['id'], source['user'], source['video'], source['text'], source['replying'],
+			source['postDate'], source['editDate'], source['interactions'], source['replies'],
+			source['interactionCounts']
+		)
 
 class Edge:
 	def __init__(self):
@@ -363,6 +411,7 @@ class FloatplaneClient:
 		return User.generate(json['user'])
 
 	# /user/subscriptions
+	@memorize('subscriptions')
 	def getSubscriptions(self):
 		path = '/user/subscriptions'
 
@@ -394,23 +443,68 @@ class FloatplaneClient:
 		return videoList
 
 	# /video/info?videoGUID=XXXX
-	def getVideoInfo(self, videoId):
-		pass
+	def getVideoInfo(self, videoGuid):
+		path = '/video/info?videoGUID={}'.format(videoGuid)
+		json = self.requestApiJson(path)
+
+		if len(json) <= 0:
+			log.info('No video found for {}'.format(videoGuid))
+			return
+
+		video = Video.generate(json)
+		return video
 
 	# /video/related?videoGUID=XXXX
-	def getReleatedVideos(self, videoId):
+	def getReleatedVideos(self, videoGuid):
 		pass
 
 	# /video/comments?videoGUID=XXXX
-	def getVideoComments(self, videoId):
-		pass
+	def getVideoComments(self, videoGuid):
+		path = '/video/comments?videoGUID={}'.format(videoGuid)
+		json = self.requestApiJson(path)
+
+		if len(json) <= 0:
+			log.info('No video found for {}'.format(videoGuid))
+			return
+
+		comments = []
+		for comment in json['comments']:
+			comment_obj = Comment.generate(comment)
+			comment_obj.user = self.getUser(comment_obj.user.id)[comment_obj.user.id]
+			comments.append(comment_obj)
+
+		return comments
 
 	# /edges
 	def getEdges(self):
 		pass
 
 	# /user/info?id=XXXX[&id=XXXX]
+	@memorize('user')
 	def getUser(self, userId):
+		path = '/user/info?' + self.getRequestParamList('id', userId)
+		json = self.requestApiJson(path)
+
+		if len(json) <= 0:
+			log.info('No such users found')
+			return
+
+		userList = {}
+		for user in json['users']:
+			userList[user['id']] = User.generate(user['user'])
+
+		return userList
+
+	# /image/optimizations?imageType=profile_images
+	def getImageOptimizations(self):
+		# {"profile_images":[{"quality":"80","width":250,"height":250},{"quality":"80","width":100,"height":100},{"quality":"80","width":720,"height":720}]}
+		pass
+
+	# POST /user/avatar
+	# multipart/form-data
+	# Content-Disposition: form-data; name="avatar"; filename="<filename_with_ending>"
+	# Content-Type: image/jpeg
+	def pushUserAvatar(self, avatar):
 		pass
 
 	# /user/connections/list
@@ -442,6 +536,7 @@ class FloatplaneClient:
 		return requestString
 
 	# /creator/info?creatorGUID=XXXXX&creatorGUID=XXXXX
+	@memorize('creatorInfo')
 	def getCreatorInfo(self, creatorGUID):
 		path = '/creator/info?' + self.getRequestParamList('creatorGUID', creatorGUID)
 		json = self.requestApiJson(path)

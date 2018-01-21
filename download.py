@@ -18,10 +18,24 @@ else:
 	for sub in subscriptions:
 		print('Subscription: {}'.format(sub.plan.title, sub.plan.price, sub.plan.currency))
 		creators = client.getCreatorInfo(sub.creator.id)
+		creators = client.getCreatorInfo(sub.creator.id)
 
 		for creator in creators:
-			videos = client.getVideosByCreator(creator.id, limit=1)
+			videos = client.getVideosByCreator(creator.id, limit=3)
 
 			for video in videos:
 				print('Video: [{}] {}'.format(video.guid, video.title))
-				print('Link: {}'.format(client.getVideoLink(video.guid)))
+				print('ReleaseDate: {}'.format(client.getVideoInfo(video.guid).releaseDate))
+				#print('Link: {}'.format(client.getVideoLink(video.guid)))
+
+				for comment in client.getVideoComments(video.guid):
+					print("    > {} +{} -{}:\n    {}".format(
+						comment.user.username,
+						comment.interactionCounts.like,
+						comment.interactionCounts.dislike,
+						comment.text.strip()
+					))
+
+				print()
+
+			print('\n-----------------------------\n')
