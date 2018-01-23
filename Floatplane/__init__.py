@@ -17,7 +17,7 @@ FORMAT = '%(process)d %(processName)s %(asctime)-15s %(message)s'
 log = logging.getLogger('Floatplane')
 
 _cache = {}
-_timestamps = {}
+_cache_time = {}
 
 # TODO: Use decorators for caching?
 def normalize_key(key, *args, **kwargs):
@@ -51,7 +51,7 @@ def memorize(key):
 			log.debug('Cache: {}'.format(key))
 
 			# if cached and still valid -> use it
-			if _timestamps.get(cache_key, now) > now:
+			if _cache_time.get(cache_key, now) > now:
 				log.debug('Cache still valid')
 				return _cache[cache_key]
 
@@ -59,9 +59,9 @@ def memorize(key):
 			ret = func(*args, **kwargs)
 
 			_cache[cache_key] = ret
-			_timestamps[cache_key] = now + VALIDITY_PERIOD
+			_cache_time[cache_key] = now + VALIDITY_PERIOD
 
-			log.debug('Cache: Saving value until {}'.format(_timestamps[cache_key]))
+			log.debug('Cache: Saving value until {}'.format(_cache_time[cache_key]))
 			return ret
 		return _caching_wrapper
 	return _decorating_wrapper
@@ -386,7 +386,19 @@ class FloatplaneClient:
 		return req
 
 	def requestApiJson(self, path, params=[], method='GET', cookieJar=None, target=None):
-		return self.requestApi(path, params, method, cookieJar, target).json()
+		json = self.requestApi(path, params, method, cookieJar, target).json()
+
+		if 'errors' in json and type(json['errors']) is list:
+			if len(json['errors']) > 0:
+				errors = []
+				for err in json['errors']:
+					errors.append(err['reason'])
+
+				msg = "{} -> {}".format('; '.join(errors), json['message'])
+				log.error(msg)
+				raise Exception(msg)
+
+		return json
 
 	# /user/login
 	def login(self, username, password):
@@ -450,6 +462,8 @@ class FloatplaneClient:
 		if len(json) <= 0:
 			log.info('No video found for {}'.format(videoGuid))
 			return
+
+		log.debug(json)
 
 		video = Video.generate(json)
 		return video

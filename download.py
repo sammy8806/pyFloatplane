@@ -24,17 +24,20 @@ else:
 			videos = client.getVideosByCreator(creator.id, limit=3)
 
 			for video in videos:
-				print('Video: [{}] {}'.format(video.guid, video.title))
-				print('ReleaseDate: {}'.format(client.getVideoInfo(video.guid).releaseDate))
-				#print('Link: {}'.format(client.getVideoLink(video.guid)))
+				try:
+					print('Video: [{}] {}'.format(video.guid, video.title))
+					print('ReleaseDate: {}'.format(client.getVideoInfo(video.guid).releaseDate))
+					#print('Link: {}'.format(client.getVideoLink(video.guid)))
 
-				for comment in client.getVideoComments(video.guid):
-					print("    > {} +{} -{}:\n    {}".format(
-						comment.user.username,
-						comment.interactionCounts.like,
-						comment.interactionCounts.dislike,
-						comment.text.strip()
-					))
+					for comment in client.getVideoComments(video.guid):
+						print("    > {} +{} -{}:\n    {}".format(
+							comment.user.username,
+							comment.interactionCounts.like,
+							comment.interactionCounts.dislike,
+							comment.text.strip()
+						))
+				except Exception as e:
+					print('Ignoring video')
 
 				print()
 
