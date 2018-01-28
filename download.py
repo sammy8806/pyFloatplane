@@ -18,7 +18,6 @@ else:
 	for sub in subscriptions:
 		print('Subscription: {}'.format(sub.plan.title, sub.plan.price, sub.plan.currency))
 		creators = client.getCreatorInfo(sub.creator.id)
-		creators = client.getCreatorInfo(sub.creator.id)
 
 		for creator in creators:
 			videos = client.getVideosByCreator(creator.id, limit=3)
@@ -27,7 +26,7 @@ else:
 				try:
 					print('Video: [{}] {}'.format(video.guid, video.title))
 					print('ReleaseDate: {}'.format(client.getVideoInfo(video.guid).releaseDate))
-					#print('Link: {}'.format(client.getVideoLink(video.guid)))
+					print('Link: {}'.format(client.getVideoLink(video.guid)))
 
 					for comment in client.getVideoComments(video.guid):
 						print("    > {} +{} -{}:\n    {}".format(

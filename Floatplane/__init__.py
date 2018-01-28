@@ -13,7 +13,7 @@ FP_VIDEO_GET = 'https://linustechtips.com/main/applications/floatplane/interface
 VALIDITY_PERIOD = 15
 
 FORMAT = '%(process)d %(processName)s %(asctime)-15s %(message)s'
-#logging.basicConfig(format=FORMAT, level=0)
+logging.basicConfig(format=FORMAT, level=0)
 log = logging.getLogger('Floatplane')
 
 _cache = {}
@@ -372,7 +372,7 @@ class FloatplaneClient:
 
 		return [username, password]
 
-	def requestApi(self, path, params={}, method='GET', cookieJar=None, target=None):
+	def requestApi(self, path, params={}, method='GET', cookieJar=None, target=None, headers=None):
 		if cookieJar is None:
 			cookies = self.fpCookies
 		else:
@@ -381,24 +381,30 @@ class FloatplaneClient:
 		if target is None:
 			target = self.fpTarget
 
-		req = requests.request(method, target + path, data=params, cookies=cookies)
+		req = requests.request(method, target + path, data=params, cookies=cookies, headers=headers)
+
+		if req.status_code == 404:
+			raise Exception('{}: {} # {} not found!'.format(method, path, params))
 
 		return req
 
-	def requestApiJson(self, path, params=[], method='GET', cookieJar=None, target=None):
-		json = self.requestApi(path, params, method, cookieJar, target).json()
+	def requestApiJson(self, path, params=[], method='GET', cookieJar=None, target=None, headers=None):
+		try:
+			json = self.requestApi(path, params, method, cookieJar, target).json()
 
-		if 'errors' in json and type(json['errors']) is list:
-			if len(json['errors']) > 0:
-				errors = []
-				for err in json['errors']:
-					errors.append(err['reason'])
+			if 'errors' in json and type(json['errors']) is list:
+				if len(json['errors']) > 0:
+					errors = []
+					for err in json['errors']:
+						errors.append(err['reason'])
 
-				msg = "{} -> {}".format('; '.join(errors), json['message'])
-				log.error(msg)
-				raise Exception(msg)
+					msg = "{} -> {}".format('; '.join(errors), json['message'])
+					log.error(msg)
+					raise Exception(msg)
 
-		return json
+			return json
+		except Exception as e:
+			log.error('{}: {} seems wrong (not yet implemented?) {}'.format(method, path, e))
 
 	# /user/login
 	def login(self, username, password):
@@ -438,6 +444,11 @@ class FloatplaneClient:
 			subObjects.append(subObj)
 
 		return subObjects
+
+	# /creator/named?creatorURL=linustechtips
+	# ==> [Creator]
+	def getCreateByName(self, creatorName):
+		pass
 
 	# /creator/videos?creatorGUID=XXXX&limit=n
 	def getVideosByCreator(self, creatorGuid, limit=5):
@@ -488,6 +499,29 @@ class FloatplaneClient:
 			comments.append(comment_obj)
 
 		return comments
+
+	# /video/comment/interaction/set
+	# ==> GUID id, GUID user, GUID comment, GUID?? type 
+	def postCommentReaction(self, commentGUID, type):
+		path = '/video/comment/interaction/set'
+		req = self.requestApiJson(path, method='POST', params={
+			'commentGUID': commentGUID,
+			'type': type
+		})
+
+		log.debug(req)
+
+	# /video/comment/interaction/clear(commentGUID=XXX, type=null)
+	def clearCommentReaction(self, commentGUID, type):
+		path = '/video/comment/interaction/clear'
+		req = self.requestApiJson(path, method='POST', params={
+			'commentGUID': commentGUID,
+			'type': type
+		}, headers={
+			'Referer': 'https://www.floatplane.com/video/em996tSOVL'
+		})
+
+		log.debug(req)
 
 	# /edges
 	def getEdges(self):
@@ -575,3 +609,32 @@ class FloatplaneClient:
 		req = self.requestApi(path, cookieJar=self.lmgCookies, target=FP_VIDEO_GET)
 
 		return req.text
+
+	# /playlist/videos?playlistGUID=XXXX&limit=XXX
+	# ==> [Video] ?
+	def getPlaylistVideos(self, playlist, limit=3):
+		pass
+
+	# /video/comment
+	# ==> Comment
+	def postVideoComment(self, videoGUID, text):
+		path = '/video/comment'
+		json = self.requestApiJson(path, method='POST', params={'text': text})
+
+		if len(json) <= 0:
+			log.error('Comment could not be created: {}'.format(text))
+			return
+
+		comment = Comment.generate(json)
+		return comment
+
+	# TODO: Validate!
+	# /video/comment
+	# ==> ?
+	def deleteVideoComment(self, commentGUID):
+		path = '/video/comment'
+		req = self.requestApiJson(path, method='DELETE', params={
+			'commentGUID': commentGUID
+		})
+
+		log.debug(req)
