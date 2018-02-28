@@ -129,8 +129,8 @@ class Creator:
 class Plan:
 	def __init__(self, title=None, description=None, price=0.0, currency=None,
 		interval=None, intervalCount=0, logo=None):
-		if type(logo) is dict:
-			logo = Logo.generate(logo)
+		#if type(logo) is dict:
+			#logo = Logo.generate(logo)
 
 		self.title = title # String
 		self.description = description # String
@@ -265,7 +265,7 @@ class CommentInteraction:
 class Comment:
 	def __init__(self, id=None, user=None, video=None, text=None, replying=None, postDate=None,
 		editDate=None, interactions=[], replies=[], interactionCounts={}):
-		if type(user) is dict or type(user) is str or creator is None:
+		if type(user) is dict or type(user) is str or user is None:
 			user = User.generate(user)
 
 		if type(video) is dict or type(video) is str or video is None:
@@ -345,7 +345,7 @@ class FloatplaneClient:
 		if 'videoSourceUrl' not in options:
 			self.videoGetUrl = FP_VIDEO_GET
 		else:
-			self.videoGetUrl = videoSourceUrl
+			self.videoGetUrl = options['videoSourceUrl']
 
 		self.fpCookies = fpCookies
 		self.lmgCookies = lmgCookies
