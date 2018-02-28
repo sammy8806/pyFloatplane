@@ -21,10 +21,12 @@ def showVideo(video):
 				comment.interactionCounts.dislike,
 				comment.text.strip()
 			))
-	except Exception as e:
+	except Exception:
 		print('Ignoring video')
 
 def showCreator(creator):
+	print('Owner: {}'.format(client.getUser(creator.owner)))
+
 	videos = client.getVideosByCreator(creator.id, limit=3)
 
 	if videos is None:
@@ -50,7 +52,7 @@ if not subscriptions:
 	print('No subscriptions found!')
 else:
 	for sub in subscriptions:
-		print('Subscription: {}'.format(sub.plan.title, sub.plan.price, sub.plan.currency))
+		print('Subscription: {} ({} {})'.format(sub.plan.title, sub.plan.price, sub.plan.currency))
 		creators = client.getCreatorInfo(sub.creator.id)
 
 		for creator in creators:

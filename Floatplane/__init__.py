@@ -66,12 +66,33 @@ def memorize(key):
 		return _caching_wrapper
 	return _decorating_wrapper
 
+class Activity:
+	def __init__(self, id=None, user=None):
+		if type(user) is dict:
+			user = User.generate(user)
+		
+		self.id = id # String : Id
+		self.user = user # User
+
+	@staticmethod
+	def generate(source):
+		if source is None or len(source) is 0:
+			return Activity()
+		if type(source) is str and len(source) > 0:
+			return Activity(id=source)
+
+		return Activity(source['id'], source['user'])
+
 class User:
-	def __init__(self, id=None, username=None, profileImage=None):
+	def __init__(self, id=None, username=None, profileImage=None, email=None):
 		if type(profileImage) is dict:
-			profileImage = Image.generate(profileImage)
+			if 'path' in profileImage:
+				profileImage = Image.generate(profileImage)
+			else:
+				profileImage = FullImage.generate(profileImage)
 
 		self.id = id # String : Id (Hash?)
+		self.email = email # String
 		self.username = username # String
 		self.profileImage = profileImage # Image
 
@@ -81,8 +102,10 @@ class User:
 			return User()
 		if type(source) is str and len(source) > 0:
 			return User(id=source)
+		
+		email = [source['email'] if 'email' in source else None]
 
-		return User(source['id'], source['username'], source['profileImage'])
+		return User(source['id'], source['username'], source['profileImage'], email)
 
 class UserConnection:
 	def __init__(self, key=None, name=None, enabled=False, connected=False, connectedAccount=None):
@@ -97,6 +120,9 @@ class Creator:
 		description=None, about=None, cover=None, category=None):
 		if type(cover) is dict:
 			cover = Image.generate(cover)
+		
+		if type(owner) is dict:
+			owner = User.generate(owner)
 		
 		self.id = id # String : Id (Hash?)
 		self.owner = owner # String : Id (Hash?)
@@ -178,6 +204,46 @@ class FloatplaneInfo:
 	def __init__(self):
 		self.workerUrl = None # Sub-Url
 		self.firebase = {} # FirebaseInfo
+
+class FullImage:
+	def __init__(self, id=None, createdAt=None, extension=None, height=None,
+		originalName=None, owner=None, size=None, imageType=None, updatedAt=None, width=None):
+		
+		self.id = id # String : Guid
+		
+		self.extension = extension # String
+		self.size = size # Integer
+		self.type = imageType # String : Guid
+		self.originalName = originalName # String
+
+		self.owner = owner # String : Guid
+
+		self.height = height # Integer
+		self.width = width # Integer
+		
+		self.createdAt = createdAt # Timestamp
+		self.updatedAt = updatedAt # Timestamp
+
+	@staticmethod
+	def generate(source):
+		if source is None or len(source) is 0:
+			return FullImage()
+		
+		if type(source) is str and len(source) > 0:
+			return FullImage(id=source)
+		
+		return FullImage(
+			id=source['id'],
+			createdAt=source['createdAt'],
+			extension=source['extension'],
+			height=source['height'],
+			originalName=source['originalName'],
+			owner=source['owner'],
+			size=source['size'],
+			imageType=source['type'],
+			updatedAt=source['updatedAt'],
+			width=source['width'])
+
 
 class Image:
 	def __init__(self, width=0, height=0, path=None, childImages=[]):
@@ -452,12 +518,30 @@ class FloatplaneClient:
 
 		return subObjects
 
+	# /user/administrator?id=<userGuid>
+	# ==> Boolean
+	@memorize('administrator')
+	def isAdministrator(self, user):
+		userObj = [user if type(user) is not User else self.getUser(user).values()[0]]
+
+		path = '/user/administrator?id={}'.format(userObj.id)
+		adminStatus = self.requestApiJson(path)
+
+		if adminStatus is not True and adminStatus is not False:
+			log.info('Could not check administrative status for {}'.format(userObj.name))
+			return
+
+		return adminStatus
+
+
 	# /creator/named?creatorURL=linustechtips
 	# ==> [Creator]
+	@memorize('creatorByName')
 	def getCreateByName(self, creatorName):
 		pass
 
 	# /creator/videos?creatorGUID=XXXX&limit=n
+	@memorize('videosByCreator')
 	def getVideosByCreator(self, creatorGuid, limit=5):
 		path = '/creator/videos?creatorGUID={}&limit={}'.format(creatorGuid, limit)
 		json = self.requestApiJson(path)
@@ -473,6 +557,7 @@ class FloatplaneClient:
 		return videoList
 
 	# /video/info?videoGUID=XXXX
+	@memorize('videoInfo')
 	def getVideoInfo(self, videoGuid):
 		path = '/video/info?videoGUID={}'.format(videoGuid)
 		json = self.requestApiJson(path)
@@ -487,10 +572,12 @@ class FloatplaneClient:
 		return video
 
 	# /video/related?videoGUID=XXXX
+	@memorize('relatedVideos')
 	def getReleatedVideos(self, videoGuid):
 		pass
 
 	# /video/comments?videoGUID=XXXX
+	@memorize('videoComments')
 	def getVideoComments(self, videoGuid):
 		path = '/video/comments?videoGUID={}'.format(videoGuid)
 		json = self.requestApiJson(path)
@@ -508,7 +595,7 @@ class FloatplaneClient:
 		return comments
 
 	# /video/comment/interaction/set
-	# ==> GUID id, GUID user, GUID comment, GUID?? type 
+	# ==> GUID id, GUID user, GUID comment, GUID?? type
 	def postCommentReaction(self, commentGUID, type):
 		path = '/video/comment/interaction/set'
 		req = self.requestApiJson(path, method='POST', params={
@@ -531,6 +618,7 @@ class FloatplaneClient:
 		log.debug(req)
 
 	# /edges
+	@memorize('edges')
 	def getEdges(self):
 		pass
 
@@ -550,7 +638,32 @@ class FloatplaneClient:
 
 		return userList
 
+	# /user/named?username=<userName>
+	# ==> {users: [ User, ... ]}
+	@memorize('userByName')
+	def getUserByName(self, userName):
+		pass
+
+	# /user/activity?id=<userGuid>
+	# ==> [ Activity ]
+	@memorize('userActivity')
+	def getUserActivity(self, user):
+		userObj = [user if type(user) is not User else self.getUser(user).values()[0]]
+		path = '/user/activity?' + self.getRequestParamList('id', userObj.id)
+		json = self.requestApiJson(path)
+
+		if len(json) <= 0:
+			log.info('No activity for user {} found'.format(userObj.username))
+			return
+
+		actitvityList = []
+		for activity in json['activity']:
+			actitvityList.append(Activity.generate(activity))
+
+		return actitvityList
+
 	# /image/optimizations?imageType=profile_images
+	@memorize('imageOptimizations')
 	def getImageOptimizations(self):
 		# {"profile_images":[{"quality":"80","width":250,"height":250},{"quality":"80","width":100,"height":100},{"quality":"80","width":720,"height":720}]}
 		pass
@@ -563,14 +676,17 @@ class FloatplaneClient:
 		pass
 
 	# /user/connections/list
+	@memorize('userConnections')
 	def getUserConnections(self):
 		pass
 
 	# /push/web/info
+	@memorize('pushInfo')
 	def getPushInfo(self):
 		pass
 
 	# /user/creator?id=XXXX
+	@memorize('creator')
 	def getCreator(self, creatorId):
 		pass
 
@@ -622,6 +738,7 @@ class FloatplaneClient:
 		return creatorInfos
 
 	# VIDEO_HOST/video_url.php?video_guid=XXXX&video_quality=XXXX
+	@memorize('videoLink')
 	def getVideoLink(self, videoId, quality=1080):
 		"""
 		Needs Cookie for https://linustechtips.com
@@ -634,6 +751,7 @@ class FloatplaneClient:
 
 	# /playlist/videos?playlistGUID=XXXX&limit=XXX
 	# ==> [Video] ?
+	@memorize('playlistVideos')
 	def getPlaylistVideos(self, playlist, limit=3):
 		pass
 
