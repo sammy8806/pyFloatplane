@@ -13,7 +13,7 @@ FP_VIDEO_GET = 'https://linustechtips.com/main/applications/floatplane/interface
 VALIDITY_PERIOD = 15
 
 FORMAT = '%(process)d %(processName)s %(asctime)-15s %(message)s'
-logging.basicConfig(format=FORMAT, level=0)
+#logging.basicConfig(format=FORMAT, level=0)
 log = logging.getLogger('Floatplane')
 
 _cache = {}
@@ -94,7 +94,7 @@ class UserConnection:
 
 class Creator:
 	def __init__(self, id=None, owner=None, title=None, urlname=None,
-		description=None, about=None, cover=None):
+		description=None, about=None, cover=None, category=None):
 		if type(cover) is dict:
 			cover = Image.generate(cover)
 		
@@ -106,6 +106,8 @@ class Creator:
 		self.about = about # String : Description (Markdown?!)
 		self.cover = cover # Image
 
+		self.category = category # String : Id
+
 	@staticmethod
 	def generate(source):
 		if source is None or len(source) is 0:
@@ -114,9 +116,14 @@ class Creator:
 		if type(source) is str:
 			return Creator(source)
 
+		if 'coverImage' in source:
+			coverImage = source['coverImage']
+		else:
+			coverImage = None
+
 		return Creator(
 			source['id'], source['owner'], source['title'], source['urlname'],
-			source['description'], source['about'], source['cover']
+			source['description'], source['about'], coverImage, source['category']
 		)
 
 class Plan:
@@ -582,6 +589,21 @@ class FloatplaneClient:
 			requestString += '{}={}'.format(paramName, values)
 
 		return requestString
+
+	@memorize('creatorList')
+	def getCreatorList(self):
+		path = '/creator/list'
+		json = self.requestApiJson(path)
+
+		if len(json) <= 0:
+			log.info('No such creators found')
+			return
+
+		creators = []
+		for creator in json:
+			creators.append(Creator.generate(creator))
+
+		return creators
 
 	# /creator/info?creatorGUID=XXXXX&creatorGUID=XXXXX
 	@memorize('creatorInfo')
