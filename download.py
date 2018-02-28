@@ -27,15 +27,23 @@ def showVideo(video):
 def showCreator(creator):
 	videos = client.getVideosByCreator(creator.id, limit=3)
 
-	for video in videos:
-		showVideo(video)
-		print()
+	if videos is None:
+		print('No videos found for creator {}'.format(creator.title))
+	else:
+		for video in videos:
+			print()
+			showVideo(video)
 
 creators = client.getCreatorList()
-for creator in creators:
-	print('-> Found {}'.format(creator.title))
 
-	showCreator(creator)
+if creators is None:
+	print('No creators creators found')
+else:
+	for creator in creators:
+		print('-> Found {}'.format(creator.title))
+
+		showCreator(creator)
+		print()
 
 subscriptions = client.getSubscriptions()
 if not subscriptions:
