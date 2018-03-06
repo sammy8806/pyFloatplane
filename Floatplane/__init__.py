@@ -547,7 +547,7 @@ class FloatplaneClient:
 		path = '/creator/videos?creatorGUID={}'.format(creatorGuid)
 		videoList = []
 
-		if limit > 0:
+		if limit is not None and limit > 0:
 			path += '&limit={}'.format(limit)
 		
 		json = self.requestApiJson(path)

@@ -66,5 +66,5 @@ else:
 		creators = client.getCreatorInfo(sub.creator.id)
 
 		for creator in creators:
-			showCreator(creator, videoLimit=0, commentsPerVideo=0)
+			showCreator(creator)
 			print('\n-----------------------------\n')
