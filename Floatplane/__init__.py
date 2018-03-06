@@ -19,7 +19,6 @@ log = logging.getLogger('Floatplane')
 _cache = {}
 _cache_time = {}
 
-# TODO: Use decorators for caching?
 def normalize_key(key, *args, **kwargs):
 	log.debug("Key: {}".format(key))
 	log.debug("Args: {}".format(args))
