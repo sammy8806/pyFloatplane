@@ -522,12 +522,13 @@ class FloatplaneClient:
 	# ==> Boolean
 	@memorize('administrator')
 	def isAdministrator(self, user):
-		userObj = [user if type(user) is not User else self.getUser(user).values()[0]]
+		userObj = user if type(user) is not User else self.getUser(user).values()[0]
 
 		path = '/user/administrator?id={}'.format(userObj.id)
 		adminStatus = self.requestApiJson(path)
 
-		if adminStatus is not True and adminStatus is not False:
+		# @TODO: Consider using exceptions
+		if type(adminStatus) is not bool:
 			log.info('Could not check administrative status for {}'.format(userObj.name))
 			return
 
@@ -578,15 +579,22 @@ class FloatplaneClient:
 
 	# /video/comments?videoGUID=XXXX
 	@memorize('videoComments')
-	def getVideoComments(self, videoGuid):
+	def getVideoComments(self, videoGuid, limit=None):
+		comments = []
+		
 		path = '/video/comments?videoGUID={}'.format(videoGuid)
+		if limit is not None and limit > 0:
+			path += '&limit={}'.format(limit)
+		
+		if limit is 0:
+			return comments
+
 		json = self.requestApiJson(path)
 
-		if len(json) <= 0:
-			log.info('No video found for {}'.format(videoGuid))
-			return
+		if json is None:
+			log.info('Video ({}) not found'.format(videoGuid))
+			return comments
 
-		comments = []
 		for comment in json['comments']:
 			comment_obj = Comment.generate(comment)
 			comment_obj.user = self.getUser(comment_obj.user.id)[comment_obj.user.id]
@@ -605,6 +613,7 @@ class FloatplaneClient:
 
 		log.debug(req)
 
+	# @TODO
 	# /video/comment/interaction/clear(commentGUID=XXX, type=null)
 	def clearCommentReaction(self, commentGUID, type):
 		path = '/video/comment/interaction/clear'
@@ -648,7 +657,7 @@ class FloatplaneClient:
 	# ==> [ Activity ]
 	@memorize('userActivity')
 	def getUserActivity(self, user):
-		userObj = [user if type(user) is not User else self.getUser(user).values()[0]]
+		userObj = user if type(user) is not User else self.getUser(user).values()[0]
 		path = '/user/activity?' + self.getRequestParamList('id', userObj.id)
 		json = self.requestApiJson(path)
 
@@ -744,10 +753,27 @@ class FloatplaneClient:
 		Needs Cookie for https://linustechtips.com
 		"""
 
+		#raise Exception('Please use getVideoURL insted')
+
 		path = '/video_url.php?video_guid={}&video_quality={}'.format(videoId, quality)
 		req = self.requestApi(path, cookieJar=self.lmgCookies, target=FP_VIDEO_GET)
 
 		return req.text
+	
+	# GET /video/url?guid=00nU1J5UfP&quality=1080
+	@memorize('videoURL')
+	def getVideoURL(self, videoId, quality=1080):
+		path = '/video/url?guid={}&quality={}'.format(videoId, quality)
+		req = self.requestApi(path, headers={
+			'Referer': 'https://www.floatplane.com/video/{}'.format(videoId)
+		})
+		
+		response = req.text
+		if req is None or len(response) <= 0 or req.status_code != 200:
+			log.info('VideoURL could not be acquired: {}'.format(response))
+			return
+		
+		return response
 
 	# /playlist/videos?playlistGUID=XXXX&limit=XXX
 	# ==> [Video] ?
@@ -778,3 +804,19 @@ class FloatplaneClient:
 		})
 
 		log.debug(req)
+
+	# POST: /user/password/reset/request
+	# {email: 'test@test.de'}
+	# Referer: https://www.floatplane.com/reset-password
+	# => {"message":"We sent a recovery link to your email. Please follow the instructions inside the message."}
+	def requestPasswordReset(self, email):
+		pass
+
+	# Email: https://www.floatplane.com/reset-password?code=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	# POST: /user/password/reset
+	# {key: '...', password: 'plainpass'}
+
+	# POST: /user/connections/ltt/refresh
+	# => {"site":{"key":"ltt","name":"LinusTechTips","enabled":true,"isAccountProvider":true,"connected":true,"connectedAccount":{"remoteUserId":XXXX,"remoteUserName":"XXX"}}}
+	def refreshUserConnection(self, partner='ltt'):
+		pass
