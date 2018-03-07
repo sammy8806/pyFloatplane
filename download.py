@@ -60,6 +60,10 @@ print('Searching for Subscriptions ...')
 subscriptions = client.getSubscriptions()
 if not subscriptions:
 	print('No subscriptions found!')
+
+	# Should fix timeouts for oauth logins	
+	print('Trying to reconnect account to forum')
+	client.refreshUserConnection()
 else:
 	for sub in subscriptions:
 		print('Subscription: {} ({} {})'.format(sub.plan.title, sub.plan.price, sub.plan.currency))

@@ -13,7 +13,7 @@ FP_VIDEO_GET = 'https://linustechtips.com/main/applications/floatplane/interface
 VALIDITY_PERIOD = 15
 
 FORMAT = '%(process)d %(processName)s %(asctime)-15s %(message)s'
-#logging.basicConfig(format=FORMAT, level=0)
+logging.basicConfig(format=FORMAT, level=0)
 log = logging.getLogger('Floatplane')
 
 _cache = {}
@@ -822,4 +822,7 @@ class FloatplaneClient:
 	# POST: /user/connections/ltt/refresh
 	# => {"site":{"key":"ltt","name":"LinusTechTips","enabled":true,"isAccountProvider":true,"connected":true,"connectedAccount":{"remoteUserId":XXXX,"remoteUserName":"XXX"}}}
 	def refreshUserConnection(self, partner='ltt'):
-		pass
+		path = '/user/connections/ltt/refresh'
+		json = self.requestApiJson(path, method='POST')
+
+		return json
