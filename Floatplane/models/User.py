@@ -9,9 +9,11 @@ class User:
 			else:
 				profileImage = FullImage.generate(profileImage)
 
+		if username:
+			self.username = username # String
+
 		self.id = id # String : Id (Hash?)
 		self.email = email # String
-		self.username = username # String
 		self.profileImage = profileImage # Image
 
 	@staticmethod
@@ -21,7 +23,8 @@ class User:
 		if type(source) is str and len(source) > 0:
 			return User(id=source)
 		
-		email = [source['email'] if 'email' in source else None]
+		email = source['email'] if 'email' in source else None
+		username = source['username'] if 'username' in source else None
 
-		return User(source['id'], source['username'], source['profileImage'], email)
+		return User(source['id'], username, source['profileImage'], email)
 
