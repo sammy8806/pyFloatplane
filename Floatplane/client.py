@@ -401,7 +401,36 @@ class FloatplaneClient:
 	# ==> [Video] ?
 	@memorize('playlistVideos')
 	def getPlaylistVideos(self, playlist, limit=3):
-		pass
+		playlistId = playlist if type(playlist) is not Playlist else playlist.id
+
+		path = '/playlist/videos?playlistGUID={}&limit={}'.format(playlistId, limit)
+		req = self.requestApiJson(path)
+
+		if req is None or len(req) <= 0:
+			log.info('Playlist could not be acquired: {}'.format(req))
+			return
+		
+		videos = []
+		for video in req:
+			videos.append(Video.generate(video))
+
+		return videos
+
+	# /playlists?creatorGUID={}
+	def getCreatorPlaylists(self, creator, limit=5):
+		creator = creator if type(creator) is Creator else self.getCreator(creator).values()[0]
+		path = '/creator/playlists?creatorGUID={}&limit={}'.format(creator.id, limit)
+		req = self.requestApiJson(path)
+
+		if req is None or len(req) <= 0:
+			log.info('Creator playlists could not be acquired: {}'.format(req))
+			return
+
+		playlists = []
+		for playlist in req:
+			playlists.append(Playlist.generate(playlist))
+
+		return playlists
 
 	# /video/comment
 	# ==> Comment

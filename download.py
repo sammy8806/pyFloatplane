@@ -5,7 +5,7 @@ import logging
 from Floatplane import FloatplaneClient
 from Floatplane.config import LOG_FORMAT
 
-from basicFunctions import showCreator, showVideo, showVideoComments
+from basicFunctions import showCreator, showVideo, showVideoComments, showCreatorPlaylists
 
 #logging.basicConfig(format=LOG_FORMAT, level=0)
 
@@ -41,6 +41,9 @@ try:
 			creators = client.getCreatorInfo(sub.creator.id)
 
 			for creator in creators:
+				print('\n----- Playlists -----')
+				showCreatorPlaylists(client, creator)
+				print('\n----- Videos -----')
 				showCreator(client, creator, showVideoFunc=showVideo, displayDownloadLink=False)
 				print('\n-----------------------------\n')
 
