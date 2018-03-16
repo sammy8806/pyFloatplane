@@ -41,7 +41,7 @@ try:
 			creators = client.getCreatorInfo(sub.creator.id)
 
 			for creator in creators:
-				showCreator(client, creator, showVideoFunc=showVideo)
+				showCreator(client, creator, showVideoFunc=showVideo, displayDownloadLink=False)
 				print('\n-----------------------------\n')
 
 except KeyboardInterrupt:

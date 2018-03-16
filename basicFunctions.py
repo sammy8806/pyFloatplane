@@ -12,14 +12,14 @@ def showVideo(client, video, commentLimit=None, displayDownloadLink=False):
         print('Video: [{}] {}'.format(video.guid, video.title))
         print('ReleaseDate: {}'.format(client.getVideoInfo(video.guid).releaseDate.strftime("%d.%m.%Y %H:%M:%S")))
         if displayDownloadLink:
-            print('Link: {}'.format(client.getVideoURL(video.guid)))
+            print('Link: {}'.format(client.getDirectVideoURL(video.guid)))
 
         showVideoComments(client, video, commentLimit)
     except Exception as e:
         print('Ignoring video')
         print(e)
 
-def showCreator(client, creator, videoLimit=None, commentsPerVideo=None, resolveVideos=True, showVideoFunc=None):
+def showCreator(client, creator, videoLimit=None, commentsPerVideo=None, resolveVideos=True, showVideoFunc=None, displayDownloadLink=False):
     # print('Owner: {}'.format(client.getUser(creator.owner)))
 
     if not resolveVideos:
@@ -33,4 +33,4 @@ def showCreator(client, creator, videoLimit=None, commentsPerVideo=None, resolve
         for video in videos:
             print()
             if showVideoFunc:
-                showVideoFunc(client, video, commentLimit=commentsPerVideo)
+                showVideoFunc(client, video, commentLimit=commentsPerVideo, displayDownloadLink=displayDownloadLink)

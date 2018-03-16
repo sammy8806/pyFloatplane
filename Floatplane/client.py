@@ -370,7 +370,7 @@ class FloatplaneClient:
 		Needs Cookie for https://linustechtips.com
 		"""
 
-		#raise Exception('Please use getVideoURL insted')
+		raise Exception('Please use getVideoURL insted')
 
 		path = '/video_url.php?video_guid={}&video_quality={}'.format(videoId, quality)
 		req = self.requestApi(path, cookieJar=self.lmgCookies, target=config.FP_VIDEO_GET)
@@ -392,6 +392,11 @@ class FloatplaneClient:
 		
 		return response
 
+	@memorize('DirectVideoURL')
+	def getDirectVideoURL(self, videoId, quality=1080):
+		url = self.getVideoURL(videoId, quality)
+		return url.replace('/chunk.m3u8', '')
+	
 	# /playlist/videos?playlistGUID=XXXX&limit=XXX
 	# ==> [Video] ?
 	@memorize('playlistVideos')
