@@ -10,7 +10,7 @@ def showVideoComments(client, video, limit=None):
 def showVideo(client, video, commentLimit=None, displayDownloadLink=False):
     try:
         print('Video: [{}] {}'.format(video.guid, video.title))
-        print('ReleaseDate: {}'.format(client.getVideoInfo(video.guid).releaseDate))
+        print('ReleaseDate: {}'.format(client.getVideoInfo(video.guid).releaseDate.strftime("%d.%m.%Y %H:%M:%S")))
         if displayDownloadLink:
             print('Link: {}'.format(client.getVideoURL(video.guid)))
 

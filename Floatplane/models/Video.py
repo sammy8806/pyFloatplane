@@ -1,3 +1,5 @@
+import dateutil.parser
+
 from Floatplane.models.Creator import Creator
 from Floatplane.models.Image import Image
 
@@ -16,11 +18,13 @@ class Video:
 		self.tags = tags # String[]
 		self.description = description # String?
 		self.private = private # Bool
-		self.releaseDate = releaseDate # IsoTimestamp
 		self.duration = duration # Int? : Seconds?
 		self.creator = creator # Creator
 		self.thumbnail = thumbnail # Thumbnail
 		self.relatedVideos = relatedVideos # Videos
+
+		if releaseDate:
+			self.releaseDate = dateutil.parser.parse(releaseDate) # IsoTimestamp
 
 	@staticmethod
 	def generate(source):
