@@ -27,6 +27,12 @@ try:
 
 	print()
 
+	print('Searching for Edge Endpoints ...')
+	edges = client.getEdges()
+	print('Found {} Edges'.format(len(edges.edges)))
+
+	print()
+
 	print('Searching for Subscriptions ...')
 	subscriptions = client.getSubscriptions()
 	if not subscriptions:

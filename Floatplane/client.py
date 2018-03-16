@@ -246,7 +246,14 @@ class FloatplaneClient:
 	# /edges
 	@memorize('edges')
 	def getEdges(self):
-		pass
+		path = '/edges'
+		json = self.requestApiJson(path)
+
+		if json is None or len(json) <= 0:
+			log.info('No edges found')
+			return
+		
+		return Edge.generate(json)
 
 	# /user/info?id=XXXX[&id=XXXX]
 	@memorize('user')

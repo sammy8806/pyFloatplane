@@ -4,6 +4,7 @@ from Floatplane.models.Client import Client
 from Floatplane.models.Comment import Comment
 from Floatplane.models.CommentInteraction import CommentInteraction
 from Floatplane.models.Creator import Creator
+from Floatplane.models.Edge import Edge
 from Floatplane.models.EdgeDatacenter import EdgeDatacenter
 from Floatplane.models.EdgeServer import EdgeServer
 from Floatplane.models.Error import Error

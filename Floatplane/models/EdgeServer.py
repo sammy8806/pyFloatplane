@@ -1,8 +1,23 @@
+from Floatplane.models.EdgeDatacenter import EdgeDatacenter
+
 class EdgeServer:
-	def __init__(self):
-		self.hostname = None # String
-		self.queryPort = 0 # Int : Port
-		self.bandwith = 0 # Long : in kbit?
-		self.allowDownload = False # Boolean
-		self.allowStreaming = False # Boolean (Live-Streaming?)
-		self.datacenter = None # EdgeDatacenter
+	def __init__(self, hostname=None, queryPort=0, bandwidth=0, allowDownload=False, allowStreaming=False, datacenter=None):
+		self.hostname = hostname # String
+		self.queryPort = queryPort # Int : Port
+		self.bandwidth = bandwidth # Long : in kbit?
+		self.allowDownload = allowDownload # Boolean
+		self.allowStreaming = allowStreaming # Boolean (Live-Streaming?)
+		self.datacenter = datacenter # EdgeDatacenter
+
+		if datacenter:
+			self.datacenter = datacenter if type(datacenter) is EdgeDatacenter else EdgeDatacenter.generate(datacenter)
+
+	@staticmethod
+	def generate(source):
+		if source is None or len(source) is 0:
+			return EdgeServer()
+		
+		return EdgeServer(
+			source['hostname'], source['queryPort'], source['bandwidth'], source['allowDownload'],
+			source['allowStreaming'], source['datacenter']
+		)
