@@ -106,11 +106,11 @@ class FloatplaneClient:
 
         json = request.json()
 
-		if len(json) <= 0:
-			return None
-		
-		if 'Logged In Successfully' not in json['message']:
-			raise Exception('Error while login-request: {}'.format(json['message']))
+        if len(json) <= 0:
+            return None
+
+        if 'user' not in json and json['user'] is not None:
+            raise Exception('Error while login-request: {}'.format(json['message']))
 
         return User.generate(json['user'])
 
