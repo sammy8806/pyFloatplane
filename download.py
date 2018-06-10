@@ -7,52 +7,55 @@ from Floatplane.config import LOG_FORMAT
 
 from basicFunctions import showCreator, showVideo, showVideoComments, showCreatorPlaylists
 
-#logging.basicConfig(format=LOG_FORMAT, level=0)
+# logging.basicConfig(format=LOG_FORMAT, level=0)
 
 try:
-	client = FloatplaneClient()
-	username, password = client.loadCredentials()
-	loggedInUser = client.login(username, password)
-	if not loggedInUser:
-		raise Exception('User login not valid')
+    client = FloatplaneClient()
+    username, password = client.loadCredentials()
+    loggedInUser = client.login(username, password)
+    if not loggedInUser:
+        raise Exception('User login not valid')
 
-	print('Searching for Creators ...')
-	creators = client.getCreatorList()
+    print('Searching for Edges ...')
+    edges = client.getEdges()
 
-	if creators is None:
-		print('No creators creators found')
-	else:
-		for creator in creators:
-			print('-> Found {}'.format(creator.title))
+    print('Searching for Creators ...')
+    creators = client.getCreatorList()
 
-	print()
+    if creators is None:
+        print('No creators creators found')
+    else:
+        for creator in creators:
+            print('-> Found {}'.format(creator.title))
 
-	print('Searching for Edge Endpoints ...')
-	edges = client.getEdges()
-	print('Found {} Edges'.format(len(edges.edges)))
+    print()
 
-	print()
+    print('Searching for Edge Endpoints ...')
+    edges = client.getEdges()
+    print('Found {} Edges'.format(len(edges.edges)))
 
-	print('Searching for Subscriptions ...')
-	subscriptions = client.getSubscriptions()
-	if not subscriptions:
-		print('No subscriptions found!')
+    print()
 
-		# Should fix timeouts for oauth logins	
-		print('Trying to reconnect account to forum')
-		client.refreshUserConnection()
-	else:
-		for sub in subscriptions:
-			print('Subscription: {} ({} {})'.format(sub.plan.title, sub.plan.price, sub.plan.currency))
-			creators = client.getCreatorInfo(sub.creator.id)
+    print('Searching for Subscriptions ...')
+    subscriptions = client.getSubscriptions()
+    if not subscriptions:
+        print('No subscriptions found!')
 
-			for creator in creators:
-				print('\n----- Playlists -----')
-				showCreatorPlaylists(client, creator)
-				print('\n----- Videos -----')
-				showCreator(client, creator, showVideoFunc=showVideo, displayDownloadLink=False)
-				print('\n-----------------------------\n')
+        # Should fix timeouts for oauth logins
+        print('Trying to reconnect account to forum')
+        client.refreshUserConnection()
+    else:
+        for sub in subscriptions:
+            print('Subscription: {} ({} {})'.format(sub.plan.title, sub.plan.price, sub.plan.currency))
+            creators = client.getCreatorInfo(sub.creator.id)
+
+            for creator in creators:
+                print('\n----- Playlists -----')
+                showCreatorPlaylists(client, creator)
+                print('\n----- Videos -----')
+                showCreator(client, creator, showVideoFunc=showVideo, displayDownloadLink=True, videoLimit=1)
+                print('\n-----------------------------\n')
 
 except KeyboardInterrupt:
-	print()
-	print('Aborted by Keystroke!')
+    print()
+    print('Aborted by Keystroke!')
