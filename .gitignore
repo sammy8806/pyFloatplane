@@ -1,5 +1,9 @@
 *.pyc
 *.ini
 .vscode/tags
-*/.DS_Store
-*/._.DS_Store
+.idea
+.DS_Store
+._.DS_Store
+build/
+dist/
+*.egg-info
