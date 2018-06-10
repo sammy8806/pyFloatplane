@@ -1,7 +1,7 @@
 import time
 import logging
 
-from Floatplane.config import VALIDITY_PERIOD
+from PyFloatplane.config import VALIDITY_PERIOD
 
 log = logging.getLogger('Floatplane.Cache')
 

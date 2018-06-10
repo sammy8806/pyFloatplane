@@ -1,4 +1,4 @@
-from Floatplane.models.User import User
+from PyFloatplane.models.User import User
 
 class Activity:
 	def __init__(self, id=None, user=None):

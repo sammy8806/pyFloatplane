@@ -1,5 +1,5 @@
-from Floatplane.models.User import User
-from Floatplane.models.Image import Image
+from PyFloatplane.models.User import User
+from PyFloatplane.models.Image import Image
 
 
 class Creator:

@@ -1,7 +1,7 @@
 import logging
 
-from Floatplane.models.Creator import Creator
-from Floatplane.models.Plan import Plan
+from PyFloatplane.models.Creator import Creator
+from PyFloatplane.models.Plan import Plan
 
 log = logging.getLogger('Floatplane.models.Subscription')
 

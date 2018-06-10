@@ -1,6 +1,6 @@
-from Floatplane.models.User import User
-from Floatplane.models.Video import Video
-from Floatplane.models.CommentInteraction import CommentInteraction
+from PyFloatplane.models.User import User
+from PyFloatplane.models.Video import Video
+from PyFloatplane.models.CommentInteraction import CommentInteraction
 
 
 class Comment:

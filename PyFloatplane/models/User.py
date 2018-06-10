@@ -1,5 +1,5 @@
-from Floatplane.models.Image import Image
-from Floatplane.models.FullImage import FullImage
+from PyFloatplane.models.Image import Image
+from PyFloatplane.models.FullImage import FullImage
 
 class User:
 	def __init__(self, id=None, username=None, profileImage=None, email=None):

@@ -1,4 +1,4 @@
-from Floatplane.models.EdgeServer import EdgeServer
+from PyFloatplane.models.EdgeServer import EdgeServer
 
 class Edge:
 	def __init__(self, client=None, edges=None):

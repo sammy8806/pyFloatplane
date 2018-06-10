@@ -2,8 +2,8 @@
 
 import logging
 
-from Floatplane import FloatplaneClient
-from Floatplane.config import LOG_FORMAT
+from PyFloatplane import FloatplaneClient
+from PyFloatplane.config import LOG_FORMAT
 
 from basicFunctions import showCreator, showVideo, showVideoComments, showCreatorPlaylists
 

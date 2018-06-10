@@ -1,4 +1,4 @@
-from Floatplane.models.EdgeDatacenter import EdgeDatacenter
+from PyFloatplane.models.EdgeDatacenter import EdgeDatacenter
 
 
 class EdgeServer:

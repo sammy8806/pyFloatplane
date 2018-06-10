@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from Floatplane import FloatplaneClient
+from PyFloatplane import FloatplaneClient
 
 client = FloatplaneClient()
 

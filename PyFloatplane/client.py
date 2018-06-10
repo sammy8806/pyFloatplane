@@ -7,8 +7,8 @@ from datetime import timedelta, datetime
 # from . import annotations
 from . import config
 
-from Floatplane.annotations import memorize
-from Floatplane.models import *
+from PyFloatplane.annotations import memorize
+from PyFloatplane.models import *
 
 log = logging.getLogger('Floatplane')
 

@@ -1,7 +1,7 @@
 import dateutil.parser
 
-from Floatplane.models.Creator import Creator
-from Floatplane.models.Image import Image
+from PyFloatplane.models.Creator import Creator
+from PyFloatplane.models.Image import Image
 
 
 class Video:

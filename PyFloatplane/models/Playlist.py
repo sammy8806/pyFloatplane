@@ -1,4 +1,4 @@
-from Floatplane.models.Image import Image
+from PyFloatplane.models.Image import Image
 
 class Playlist:
 	def __init__(self, id=None, title=None, updatedAt=None, videoCount=None, image=None):
