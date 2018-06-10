@@ -84,7 +84,8 @@ class FloatplaneClient:
                     for err in json['errors']:
                         errors.append(err['reason'])
 
-                    msg = "{} -> {}".format('; '.join(errors), json['message'])
+                    errorMsg = json['message'] if 'message' in json else json['name'] if 'name' in json else None
+                    msg = "{} -> {}".format('; '.join(errors), errorMsg)
                     log.error(msg)
                     raise Exception(msg)
 
@@ -214,6 +215,10 @@ class FloatplaneClient:
         for comment in json['comments']:
             comment_obj = Comment.generate(comment)
             comment_obj.user = self.getUser(comment_obj.user.id)[comment_obj.user.id]
+
+            for comment in comment_obj.replies:
+                comment.user = self.getUser(comment.user.id)[comment.user.id]
+
             comments.append(comment_obj)
 
         return comments

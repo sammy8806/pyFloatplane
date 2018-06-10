@@ -7,6 +7,15 @@ def showVideoComments(client, video, limit=None):
             comment.text.strip()
         ))
 
+        for comment in comment.replies:
+            print("    |    > {} +{} -{}:\n    {}".format(
+                comment.user.username,
+                comment.interactionCounts.like,
+                comment.interactionCounts.dislike,
+                comment.text.strip()
+            ))
+
+
 def showVideo(client, video, commentLimit=None, displayDownloadLink=False):
     try:
         print('Video: [{}] {}'.format(video.guid, video.title))
@@ -19,24 +28,27 @@ def showVideo(client, video, commentLimit=None, displayDownloadLink=False):
         print('Ignoring video')
         print(e)
 
+
 def showCreatorPlaylists(client, creator, playlistLimit=None, videosPerPlaylist=None):
     playlists = client.getCreatorPlaylists(creator, playlistLimit)
 
     if playlists is None:
         return
-    
+
     for playlist in playlists:
         print('-> {}'.format(playlist.title))
-        
+
         videos = client.getPlaylistVideos(playlist)
-        
+
         if videos is None:
             continue
-        
+
         for video in videos:
             print('--> [{}] {}'.format(video.guid, video.title))
 
-def showCreator(client, creator, videoLimit=None, commentsPerVideo=None, resolveVideos=True, showVideoFunc=None, displayDownloadLink=False):
+
+def showCreator(client, creator, videoLimit=None, commentsPerVideo=None, resolveVideos=True, showVideoFunc=None,
+                displayDownloadLink=False):
     # print('Owner: {}'.format(client.getUser(creator.owner)))
 
     if not resolveVideos:
