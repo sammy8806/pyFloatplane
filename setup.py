@@ -5,7 +5,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name='pyFloatplane',
-    version='1.1.3',
+    version='1.1.4',
     author='Sammy8806',
     author_email='mail@sammy8806.de',
     description='Unofficial REST-Client bindings for Floatplane.com',
