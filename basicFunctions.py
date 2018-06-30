@@ -23,6 +23,15 @@ def showVideo(client, video, commentLimit=None, displayDownloadLink=False):
         if displayDownloadLink:
             print('Link: {}'.format(client.getDirectVideoURL(video.guid)))
 
+        print('Related videos:')
+
+        related = client.getReleatedVideos(video.guid)
+        for vid in related:
+            creator = client.getCreatorInfo(vid.creator.id)
+            print('-> [{}][{}] {}'.format(creator[0].title, vid.guid, vid.title))
+
+        print()
+
         showVideoComments(client, video, commentLimit)
     except Exception as e:
         print('Ignoring video')

@@ -184,15 +184,20 @@ class FloatplaneClient:
             log.info('No video found for {}'.format(videoGuid))
             return
 
-        log.debug(json)
-
         video = Video.generate(json)
         return video
 
     # /video/related?videoGUID=XXXX
     @memorize('relatedVideos')
     def getReleatedVideos(self, videoGuid):
-        pass
+        path = '/video/related?videoGUID={}'.format(videoGuid)
+        json = self.requestApiJson(path)
+
+        if len(json) <= 0:
+            log.info('No related videos found for {}'.format(videoGuid))
+            return
+
+        return [Video.generate(vid) for vid in json]
 
     # /video/comments?videoGUID=XXXX
     @memorize('videoComments')
