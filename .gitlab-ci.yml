@@ -25,8 +25,8 @@ mirror_github:
     - git remote remove github 2>/dev/null || true
     - git remote add github $GITHUB_URL
     - echo Git Debug
-    - echo GITHUB_URL: $GITHUB_URL
-    - echo CI_COMMIT_REF_NAME: $CI_COMMIT_REF_NAME
+    - echo GITHUB_URL = $GITHUB_URL
+    - echo CI_COMMIT_REF_NAME = $CI_COMMIT_REF_NAME
     - git rev-parse HEAD
     - git ls-remote $GITHUB_URL
     - git status
