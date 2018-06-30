@@ -1,4 +1,4 @@
-image: python:3.6-alpine
+image: sammy8806/python-alpine-git
 
 variables:
   PYPI_USER: SECURE
@@ -15,16 +15,23 @@ stages:
 mirror_github:
   stage: mirror
   variables:
-    GIT_SSH_COMMAND: "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+    GIT_SSH_COMMAND: "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${CI_PROJECT_DIR}/.ssh/id_rsa"
+
+  before_script:
+    - git remote remove github || true
+    - mkdir -p ${CI_PROJECT_DIR}/.ssh
+    - echo "$DEPLOY_KEY" > ${CI_PROJECT_DIR}/.ssh/id_rsa
+    - chmod 0600 ${CI_PROJECT_DIR}/.ssh/id_rsa
+
   script:
-    - mkdir ~/.ssh
-    - echo "$DEPLOY_KEY" > .id_rsa
-    - chmod 0600 .id_rsa
     - git remote add github git@github.com:sammy8806/pyFloatplane.git
     - git push github $CI_COMMIT_REF_NAME
     - git push github $CI_COMMIT_REF_NAME --tags
+
+  after_script:
     - git remote remove github
-    - rm ~/.ssh/*
+    - rm -vf ${CI_PROJECT_DIR}/.ssh/*
+
   only:
     - master
 
@@ -32,7 +39,7 @@ mirror_cleanup:
   stage: mirror
   when: always
   script:
-    - rm ~/.ssh/*
+    - rm -vf ${CI_PROJECT_DIR}/.ssh/* || true
   only:
     - master
 
