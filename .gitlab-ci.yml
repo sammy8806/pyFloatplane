@@ -18,10 +18,10 @@ mirror_github:
     GIT_SSH_COMMAND: "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${CI_PROJECT_DIR}/.ssh/id_rsa"
 
   before_script:
-    - git remote remove github || true
     - mkdir -p ${CI_PROJECT_DIR}/.ssh
     - echo "$DEPLOY_KEY" > ${CI_PROJECT_DIR}/.ssh/id_rsa
     - chmod 0600 ${CI_PROJECT_DIR}/.ssh/id_rsa
+    - git remote remove github || true
 
   script:
     - git remote add github git@github.com:sammy8806/pyFloatplane.git
