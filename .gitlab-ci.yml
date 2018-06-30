@@ -16,13 +16,20 @@ mirror_github:
   stage: mirror
   variables:
     GIT_SSH_COMMAND: "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${CI_PROJECT_DIR}/.ssh/id_rsa"
+    GITHUB_URL: "git@github.com:sammy8806/pyFloatplane.git"
 
   before_script:
     - mkdir -p ${CI_PROJECT_DIR}/.ssh
     - echo "$DEPLOY_KEY" > ${CI_PROJECT_DIR}/.ssh/id_rsa
     - chmod 0600 ${CI_PROJECT_DIR}/.ssh/id_rsa
-    - git remote remove github || true
-    - git remote add github git@github.com:sammy8806/pyFloatplane.git
+    - git remote remove github 2>/dev/null || true
+    - git remote add github $GITHUB_URL
+    - echo "Git Debug"
+    - echo "GITHUB_URL: $GITHUB_URL"
+    - echo "CI_COMMIT_REF_NAME: $CI_COMMIT_REF_NAME"
+    - git rev-parse HEAD
+    - git ls-remote $GITHUB_URL
+    - git status
 
   script:
     - git push github $CI_COMMIT_REF_NAME --force
