@@ -1,0 +1,64 @@
+image: python:2.7
+
+variables:
+  PYPI_USER: SECURE
+  PYPI_PASSWORD: SECURE
+  PYPI_REPO_URL_TEST: https://test.pypi.org/legacy/
+  PYPI_REPO_URL_LIVE: https://pypi.org/legacy/
+  PYPI_REPO_TARGET: LIVE
+
+stages:
+  - mirror
+  - deploy
+  - cleanup
+
+mirror_github:
+  stage: mirror
+  variables:
+    GIT_SSH_COMMAND: "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+  script:
+    - mkdir ~/.ssh
+    - echo "$DEPLOY_KEY" > .id_rsa
+    - chmod 0600 .id_rsa
+    - git remote add github git@github.com:sammy8806/pyFloatplane.git
+    - git push github $CI_COMMIT_REF_NAME
+    - git push github $CI_COMMIT_REF_NAME --tags
+    - git remote remove github
+    - rm ~/.ssh/*
+  only:
+    - master
+
+mirror_cleanup:
+  stage: mirror
+  when: always
+  script:
+    - rm ~/.ssh/*
+  only:
+    - master
+
+deploy_pypi:
+  stage: deploy
+  variables:
+  script:
+    - echo "[uploadtarget]" >> ~/.pypirc
+    - export REPO_URL=${PYPI_REPO_URL}_${PYPI_REPO_TARGET}
+    - echo "repository:" ${!REPO_URL} >> ~/.pypirc
+    - echo "username:" ${PYPI_USER} >> ~/.pypirc
+    - echo "password:" ${PYPI_PASSWORD} >> ~/.pypirc
+    - python setup.py check sdist bdist upload -r uploadtarget
+    - echo "" > ~/.pypirc && rm ~/.pypirc
+  only:
+    - /^v\d+\.\d+\.\d+([abc]\d*)?$/  # PEP-440 compliant
+  except:
+    - branches
+
+
+cleanup_deploy:
+  stage: cleanup
+  when: always
+  script:
+    - rm -vf ~/.pypirc
+  only:
+    - /^v\d+\.\d+\.\d+([abc]\d*)?$/  # PEP-440 compliant
+  except:
+    - branches
