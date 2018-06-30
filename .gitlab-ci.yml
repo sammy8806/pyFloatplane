@@ -23,11 +23,10 @@ mirror_github:
     - chmod 0600 ${CI_PROJECT_DIR}/.ssh/id_rsa
     - git remote remove github || true
     - git remote add github git@github.com:sammy8806/pyFloatplane.git
-    - git pull github $CI_COMMIT_REF_NAME
 
   script:
-    - git push github $CI_COMMIT_REF_NAME
-    - git push github $CI_COMMIT_REF_NAME --tags
+    - git push github $CI_COMMIT_REF_NAME --force
+    - git push github $CI_COMMIT_REF_NAME --force --tags
 
   after_script:
     - git remote remove github
