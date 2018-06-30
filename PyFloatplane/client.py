@@ -430,7 +430,11 @@ class FloatplaneClient:
     # /playlists?creatorGUID={}
     def getCreatorPlaylists(self, creator, limit=5):
         creator = creator if type(creator) is Creator else self.getCreator(creator).values()[0]
-        path = '/creator/playlists?creatorGUID={}&limit={}'.format(creator.id, limit)
+        path = '/creator/playlists?creatorGUID={}'.format(creator.id)
+
+        if limit is not None and limit > 0:
+            path += '&limit={}'.format(limit)
+
         req = self.requestApiJson(path)
 
         if req is None or len(req) <= 0:
