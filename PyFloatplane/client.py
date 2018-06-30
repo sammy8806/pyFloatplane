@@ -95,7 +95,7 @@ class FloatplaneClient:
 
     # /user/login
     def login(self, username, password):
-        path = '/user/login'
+        path = '/auth/login'
         request = self.requestApi(path, method='POST', params={
             'username': username,
             'password': password
