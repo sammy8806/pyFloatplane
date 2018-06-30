@@ -26,9 +26,9 @@ mirror_github:
     - git remote remove github 2>/dev/null || true
     - git remote add github $GITHUB_URL
     # BEGIN https://cmatskas.com/merge-detached-head-back-to-originmaster-git/
-    - git checkout –b $TEMP_BRANCH #makes a new branch from current detached HEAD
-    - git branch –f $CI_COMMIT_REF_NAME $TEMP_BRANCH #update master to point to the new <temp> branch
-    - git branch –d $TEMP_BRANCH #delete the <temp> branch
+    - git checkout -b $TEMP_BRANCH #makes a new branch from current detached HEAD
+    - git branch -f $CI_COMMIT_REF_NAME $TEMP_BRANCH #update master to point to the new <temp> branch
+    - git branch -d $TEMP_BRANCH #delete the <temp> branch
     - git push github $CI_COMMIT_REF_NAME #push the re-established history
     # END
     - echo Git Debug
