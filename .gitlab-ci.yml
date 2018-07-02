@@ -1,8 +1,6 @@
 image: sammy8806/python-alpine-git
 
 variables:
-  PYPI_USER: SECURE
-  PYPI_PASSWORD: SECURE
   PYPI_REPO_URL_TEST: https://test.pypi.org/legacy/
   PYPI_REPO_URL_LIVE: https://pypi.org/legacy/
   PYPI_REPO_TARGET: LIVE
@@ -62,10 +60,13 @@ deploy_pypi:
   variables:
   script:
     - echo "[uploadtarget]" >> ~/.pypirc
-    - export REPO_URL=${PYPI_REPO_URL}_${PYPI_REPO_TARGET}
+    - export REPO_URL=PYPI_REPO_URL_${PYPI_REPO_TARGET}
+    - echo $REPO_URL
+    - export PYPI_PASSWORD_NAME=PYPI_PASSWORD_${PYPI_REPO_TARGET}
+    - echo $PYPI_PASSWORD_NAME
     - echo "repository:" ${!REPO_URL} >> ~/.pypirc
     - echo "username:" ${PYPI_USER} >> ~/.pypirc
-    - echo "password:" ${PYPI_PASSWORD} >> ~/.pypirc
+    - echo "password:" ${!PYPI_PASSWORD_NAME} >> ~/.pypirc
     - cat ~/.pypirc | grep -v password
     - python setup.py check sdist bdist upload -r uploadtarget
     - echo "" > ~/.pypirc && rm ~/.pypirc
