@@ -66,6 +66,7 @@ deploy_pypi:
     - echo "repository:" ${!REPO_URL} >> ~/.pypirc
     - echo "username:" ${PYPI_USER} >> ~/.pypirc
     - echo "password:" ${PYPI_PASSWORD} >> ~/.pypirc
+    - cat ~/.pypirc | grep -v password
     - python setup.py check sdist bdist upload -r uploadtarget
     - echo "" > ~/.pypirc && rm ~/.pypirc
   only:
