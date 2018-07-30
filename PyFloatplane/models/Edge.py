@@ -4,7 +4,7 @@ from PyFloatplane.models.EdgeServer import EdgeServer
 
 class Edge:
     def __init__(self, client=None, edges=None):
-        if client is dict:
+        if type(client) is dict:
             client = Client.generate(client)
 
         self.client = client  # Client
