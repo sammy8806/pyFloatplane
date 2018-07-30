@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from PyFloatplane import FloatplaneClient
-from basicFunctions import showCreator, showVideo, showCreatorPlaylists
+from basicFunctions import showCreator, showVideo, showCreatorPlaylists, showEdgeSelection
 
 # logging.basicConfig(format=LOG_FORMAT, level=0)
 
@@ -27,21 +27,7 @@ try:
     print()
 
     print('Searching for Edge Endpoints ...')
-
-    edgeInfo = client.getEdges()
-    print('Found {} Edges'.format(len(edgeInfo.edges)))
-
-    for edge in edgeInfo.edges:
-        print(
-            '-> [{}-{}] {} BW:{}GBit/s Download:{} Stream:{}'.format(edge.datacenter.country_code,
-                                                                     edge.datacenter.region_code,
-                                                                     edge.hostname, edge.bandwidth / 1000 / 1000 / 1000,
-                                                                     edge.allowDownload, edge.allowStreaming))
-
-    selected_edge = client.getTargetEdgeServer()
-
-    print()
-    print('=> Selected Edge: {}'.format(selected_edge.hostname))
+    showEdgeSelection(client)
     print()
 
     print('Searching for Subscriptions ...')

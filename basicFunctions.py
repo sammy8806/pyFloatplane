@@ -72,3 +72,20 @@ def showCreator(client, creator, videoLimit=None, commentsPerVideo=None, resolve
             print()
             if showVideoFunc:
                 showVideoFunc(client, video, commentLimit=commentsPerVideo, displayDownloadLink=displayDownloadLink)
+
+
+def showEdgeSelection(client):
+    edgeInfo = client.getEdges()
+    print('Found {} Edges'.format(len(edgeInfo.edges)))
+
+    for edge in edgeInfo.edges:
+        print(
+            '-> [{}-{}] {} BW:{}GBit/s Download:{} Stream:{}'.format(edge.datacenter.country_code,
+                                                                     edge.datacenter.region_code,
+                                                                     edge.hostname, edge.bandwidth / 1000 / 1000 / 1000,
+                                                                     edge.allowDownload, edge.allowStreaming))
+
+    selected_edge = client.getTargetEdgeServer()
+
+    print()
+    print('=> Selected Edge: {}'.format(selected_edge.hostname))
