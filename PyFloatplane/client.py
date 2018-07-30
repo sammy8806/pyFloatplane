@@ -1,6 +1,7 @@
 import configparser
 import logging
 import requests
+import re
 
 from datetime import timedelta, datetime
 
@@ -395,7 +396,7 @@ class FloatplaneClient:
 
     # GET /video/url?guid=00nU1J5UfP&quality=1080
     @memorize('videoURL')
-    def getVideoURL(self, videoId, quality=1080):
+    def getVideoURL(self, videoId, quality=1080, is_download = None, is_stream = True):
         path = '/video/url?guid={}&quality={}'.format(videoId, quality)
         req = self.requestApi(path, headers={
             'Referer': 'https://www.floatplane.com/video/{}'.format(videoId)
@@ -406,11 +407,17 @@ class FloatplaneClient:
             log.info('VideoURL could not be acquired: {}'.format(response))
             return
 
+        if is_download is True:
+            is_stream = None
+
+        edge_server = self.getTargetEdgeServer(allowDownload=is_download, allowStreaming=is_stream)
+        response = re.sub(r"(https?)://.*?/(.*)$", r"\1://{}/\2", response).format(edge_server.hostname)
+
         return response
 
     @memorize('DirectVideoURL')
     def getDirectVideoURL(self, videoId, quality=1080):
-        url = self.getVideoURL(videoId, quality)
+        url = self.getVideoURL(videoId, quality, is_download=True)
         return url.replace('/chunk.m3u8', '')
 
     # /playlist/videos?playlistGUID=XXXX&limit=XXX
@@ -494,3 +501,49 @@ class FloatplaneClient:
         json = self.requestApiJson(path, method='POST')
 
         return json
+
+    def getTargetEdgeServer(self, allowDownload = True, allowStreaming = None):
+
+        edge_info = self.getEdges()
+
+        def approx_distance(source_long, source_lat, target_long, target_lat):
+            """
+            Code taken from https://stackoverflow.com/a/19412565/1679744
+            """
+
+            from math import sin, cos, sqrt, atan2, radians
+            # approximate radius of earth in km
+            R = 6373.0
+
+            lat1 = radians(source_lat)
+            lon1 = radians(source_long)
+            lat2 = radians(target_lat)
+            lon2 = radians(target_long)
+
+            dlon = lon2 - lon1
+            dlat = lat2 - lat1
+
+            a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+            c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+            distance = R * c
+
+            return distance
+
+        sorted_edges = sorted(edge_info.edges, key=lambda edge: approx_distance(
+            edge.datacenter.longitude, edge.datacenter.latitude,
+            edge_info.client.longitude, edge_info.client.latitude))
+
+        for edge in sorted_edges:
+            # allowStreaming = None
+            # allowDownload = True
+
+            if allowStreaming is not None and edge.allowStreaming is not allowStreaming:
+                continue
+
+            if allowDownload is not None and edge.allowDownload is not allowDownload:
+                continue
+
+            return edge
+
+        return sorted_edges[0] if len(sorted_edges) > 0 else EdgeServer()

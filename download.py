@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 
-import logging
-
 from PyFloatplane import FloatplaneClient
-from PyFloatplane.config import LOG_FORMAT
 from basicFunctions import showCreator, showVideo, showCreatorPlaylists
 
 # logging.basicConfig(format=LOG_FORMAT, level=0)
@@ -16,7 +13,7 @@ try:
         raise Exception('User login not valid')
 
     print('Searching for Edges ...')
-    edges = client.getEdges()
+    edgeInfo = client.getEdges()
 
     print('Searching for Creators ...')
     creators = client.getCreatorList()
@@ -30,9 +27,21 @@ try:
     print()
 
     print('Searching for Edge Endpoints ...')
-    edges = client.getEdges()
-    print('Found {} Edges'.format(len(edges.edges)))
 
+    edgeInfo = client.getEdges()
+    print('Found {} Edges'.format(len(edgeInfo.edges)))
+
+    for edge in edgeInfo.edges:
+        print(
+            '-> [{}-{}] {} BW:{}GBit/s Download:{} Stream:{}'.format(edge.datacenter.country_code,
+                                                                     edge.datacenter.region_code,
+                                                                     edge.hostname, edge.bandwidth / 1000 / 1000 / 1000,
+                                                                     edge.allowDownload, edge.allowStreaming))
+
+    selected_edge = client.getTargetEdgeServer()
+
+    print()
+    print('=> Selected Edge: {}'.format(selected_edge.hostname))
     print()
 
     print('Searching for Subscriptions ...')
