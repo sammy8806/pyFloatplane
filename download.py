@@ -1,9 +1,131 @@
 #!/usr/bin/env python3
 
+from __future__ import unicode_literals
+
+import configparser
+import logging
+import os
+
+import requests
+
 from PyFloatplane import FloatplaneClient
 from basicFunctions import showCreator, showVideo, showCreatorPlaylists, showEdgeSelection
 
+import youtube_dl
+
+log = logging.getLogger('Floatplane')
+
+
+def read_dl_config(filename = 'floatplane-dl.ini', path = '.'):
+    try:
+        config = configparser.ConfigParser()
+        config.read('{}/{}'.format(path, filename))
+
+        if 'download' in config:
+            return config['download']
+
+    except Exception as e:
+        log.warning('Could not read config: {}'.format(e))
+
+    return dict()
+
+
 # logging.basicConfig(format=LOG_FORMAT, level=0)
+
+class MyLogger(object):
+    def debug(self, msg):
+        pass
+
+    def warning(self, msg):
+        pass
+
+    def error(self, msg):
+        print(msg)
+
+
+def download_progress_hook(d):
+    if d['status'] == 'downloading':
+        print('[{}] {} / {:.2f} MB'.format(
+            d['filename'], d['_percent_str'], d['total_bytes']/1024/1024)
+        )
+
+    if d['status'] == 'finished':
+        print('Done downloading, now converting ...')
+
+
+def download_thumbnail(client, video, file_name):
+    if video.thumbnail is None:
+        log.debug('No Thumbnail seems attached to {} ... skipping'.format(video.guid))
+        return
+
+    if os.path.isfile(file_name):
+        log.warning('Thumbnail already exists ... archiving and redownloading it')
+
+        dl_try = 1
+        while os.path.isfile('{}.{}'.format(file_name, dl_try)):
+            dl_try = dl_try + 1
+
+        os.rename(file_name, '{}.{}'.format(file_name, dl_try))
+
+    log.debug('Downloading Thumbnail for {}'.format(video.guid))
+
+    thumb = requests.get(video.thumbnail.path)
+
+    if thumb.status_code >= 300:
+        log.warning('Thumbnail returned HTTP {} ... skipping'.format(thumb.status_code))
+
+    with open(file_name, 'wb') as f:
+        f.write(thumb.content)
+
+    log.debug('Thumbnail successfully downloaded')
+
+
+def download_video(client, video, commentLimit=None, displayDownloadLink=None):
+    showVideo(client, video, 0, False)
+
+    config = read_dl_config()
+    dl_dir = config['target_path'] if 'target_path' in config else 'download'
+
+    if not os.path.isdir(dl_dir):
+        dl_perms = config['target_path_permissions'] if 'target_path_permissions' in config else 0o755
+        os.mkdir(dl_dir, dl_perms)
+
+    download_url = client.getDirectVideoURL(video.guid)
+    creator = client.getCreatorInfo(video.creator.id)[0]
+
+    basename = '{}-{}-{}'.format(video.guid, creator.title, video.title)
+    output_template = '{}/{}.mp4'.format(dl_dir, basename)
+    thumbnail_template = '{}/{}.png'.format(dl_dir, basename)
+
+    if os.path.exists(output_template):
+        print('This video is already downloaded ... skipping')
+        return
+
+    if os.path.exists('{}.part'.format(output_template)):
+        print('Download seems to be interrupted ... continuing')
+
+    print('Downloading Video from: {}'.format(download_url))
+
+    download_thumbnail(client, video, thumbnail_template)
+
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'call_home': False,
+        'outtmpl': output_template,
+        'continue_dl': True,
+        'writeinfojson': True,
+        #'postprocessors': [{
+            # 'key': 'FFmpegExtractAudio',
+            # 'preferredcodec': 'mp3',
+            # 'preferredquality': '192',
+        #}],
+        'logger': MyLogger(),
+        'progress_hooks': [download_progress_hook],
+    }
+
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([download_url])
+
 
 try:
     client = FloatplaneClient()
@@ -47,7 +169,7 @@ try:
                 print('\n----- Playlists -----')
                 showCreatorPlaylists(client, creator)
                 print('\n----- Videos -----')
-                showCreator(client, creator, showVideoFunc=showVideo, displayDownloadLink=True, videoLimit=1)
+                showCreator(client, creator, showVideoFunc=download_video, displayDownloadLink=True, videoLimit=1)
                 print('\n-----------------------------\n')
 
 except KeyboardInterrupt:
