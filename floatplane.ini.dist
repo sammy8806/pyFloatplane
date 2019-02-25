@@ -32,7 +32,7 @@ password=
 ;; Default: 644
 ; dl_file_permissions=
 
-;; Number of videos to be checked for download (please keep it under at lease 40 while using crons)
+;; Number of videos to be checked for download (please keep it under at least 20 while using crons)
 ;; Value: <Int>
 ;; Default: 5
 ; video_count=

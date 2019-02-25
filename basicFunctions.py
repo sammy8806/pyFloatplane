@@ -1,4 +1,4 @@
-MAX_VIDEO_FETCH_COUNT = 40
+MAX_VIDEO_FETCH_COUNT = 20
 
 
 def showVideoComments(client, video, limit=None):

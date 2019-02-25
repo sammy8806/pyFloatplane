@@ -83,7 +83,8 @@ class FloatplaneClient:
                 if len(json['errors']) > 0:
                     errors = []
                     for err in json['errors']:
-                        errors.append(err['reason'])
+                        if 'reason' in json['errors']:
+                            errors.append(err['reason'])
 
                     errorMsg = json['message'] if 'message' in json else json['name'] if 'name' in json else None
                     msg = "{} -> {}".format('; '.join(errors), errorMsg)
