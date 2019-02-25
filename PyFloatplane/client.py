@@ -157,12 +157,15 @@ class FloatplaneClient:
 
     # /creator/videos?creatorGUID=XXXX&limit=n
     @memorize('videosByCreator')
-    def getVideosByCreator(self, creatorGuid, limit=5):
+    def getVideosByCreator(self, creatorGuid, limit=5, fetchAfter=0):
         path = '/creator/videos?creatorGUID={}'.format(creatorGuid)
         videoList = []
 
         if limit is not None and limit > 0:
             path += '&limit={}'.format(limit)
+
+        if fetchAfter is not None and fetchAfter > 0:
+            path += '&fetchAfter={}'.format(fetchAfter)
 
         json = self.requestApiJson(path)
 

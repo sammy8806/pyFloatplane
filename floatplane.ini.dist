@@ -15,22 +15,27 @@ password=
 ;; Path of the downloaded files (relative or absolute)
 ;; Value: <String>
 ;; Default: .
-;target_path=
+; target_path=
 
 ;; Permissions for the containing folders
 ;; Value: Ocatal based permissions (ex. 755)
 ;; Default: 755
-;target_path_permissions=
+; target_path_permissions=
 
 ;; Create subfolders in `target_path` with the creator shorthand (ex. linustechtips or bitwit_ultra)
 ;; Value: <True|False>
 ;; Default: False
-;creator_subfolder=
+; creator_subfolder=
 
 ;; Permissions for the downloaded files
 ;; Value: Ocatal based permissions
 ;; Default: 644
-;dl_file_permissions=
+; dl_file_permissions=
+
+;; Number of videos to be checked for download (please keep it under at lease 40 while using crons)
+;; Value: <Int>
+;; Default: 5
+; video_count=
 
 
 ;; Deprecated after move away from the forums

@@ -1,3 +1,6 @@
+MAX_VIDEO_FETCH_COUNT = 40
+
+
 def showVideoComments(client, video, limit=None):
     for comment in client.getVideoComments(video.guid, limit):
         print("    > {} +{} -{}:\n    {}".format(
@@ -63,7 +66,18 @@ def showCreator(client, creator, videoLimit=None, commentsPerVideo=None, resolve
     if not resolveVideos:
         return
 
-    videos = client.getVideosByCreator(creator.id, limit=videoLimit)
+    videos = []
+    skip_count = 0
+
+    while skip_count < videoLimit:
+        tmp_limit = videoLimit if videoLimit <= MAX_VIDEO_FETCH_COUNT else videoLimit - skip_count if videoLimit - skip_count <= MAX_VIDEO_FETCH_COUNT else MAX_VIDEO_FETCH_COUNT
+
+        tmp_vids = client.getVideosByCreator(creator.id, limit=tmp_limit, fetchAfter=skip_count)
+
+        for vid in tmp_vids:
+            videos.append(vid)
+
+        skip_count = skip_count + tmp_limit
 
     if videos is None:
         print('No videos found for creator {}'.format(creator.title))
