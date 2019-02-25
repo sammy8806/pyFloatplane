@@ -53,7 +53,7 @@ def download_progress_hook(d):
         print('Done downloading, now converting ...')
 
 
-def download_thumbnail(client, video, file_name):
+def download_thumbnail(client, video, file_name, perm = 0o775):
     if video.thumbnail is None:
         log.debug('No Thumbnail seems attached to {} ... skipping'.format(video.guid))
         return
@@ -77,6 +77,8 @@ def download_thumbnail(client, video, file_name):
     with open(file_name, 'wb') as f:
         f.write(thumb.content)
 
+    os.chmod(file_name, perm)
+
     log.debug('Thumbnail successfully downloaded')
 
 
@@ -89,6 +91,7 @@ def download_video(client, video, commentLimit=None, displayDownloadLink=None):
 
     config = read_dl_config()
     dl_dir = config[cfg_path] if cfg_path in config else 'download'
+    dl_perms = int(config[cfg_perm], base=8) if cfg_perm in config else 0o755
 
     val_subfolder = config[cfg_subfolder].strip().lower()
     if val_subfolder == 'true' or val_subfolder == '1':
@@ -97,7 +100,6 @@ def download_video(client, video, commentLimit=None, displayDownloadLink=None):
         dl_dir = '{}/{}'.format(dl_dir, creator_short)
 
     if not os.path.isdir(dl_dir):
-        dl_perms = int(config[cfg_perm], base=8) if cfg_perm in config else 0o755
         os.mkdir(dl_dir, dl_perms)
 
     download_url = client.getDirectVideoURL(video.guid)
@@ -116,7 +118,7 @@ def download_video(client, video, commentLimit=None, displayDownloadLink=None):
 
     print('Downloading Video from: {} to {}'.format(download_url, dl_dir))
 
-    download_thumbnail(client, video, thumbnail_template)
+    download_thumbnail(client, video, thumbnail_template, perm=dl_perms)
 
     ydl_opts = {
         'format': 'bestaudio/best',
@@ -135,6 +137,9 @@ def download_video(client, video, commentLimit=None, displayDownloadLink=None):
 
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         ydl.download([download_url])
+
+    os.chmod(output_template, dl_perms)
+    os.chmod('{}.info.json'.format(output_template), dl_perms)
 
 
 try:
