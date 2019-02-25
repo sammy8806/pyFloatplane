@@ -411,7 +411,7 @@ class FloatplaneClient:
             is_stream = None
 
         edge_server = self.getTargetEdgeServer(allowDownload=is_download, allowStreaming=is_stream)
-        response = re.sub(r"(https?)://.*?/(.*)$", r"\1://{}/\2", response).format(edge_server.hostname)
+        response = re.sub(r"[\"']*(https?)://.*?/(.*?)[\"']*$", r"\1://{}/\2", response).format(edge_server.hostname)
 
         return response
 

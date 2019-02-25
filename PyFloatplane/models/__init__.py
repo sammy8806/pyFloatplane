@@ -12,7 +12,9 @@ from PyFloatplane.models.Firebase import Firebase
 from PyFloatplane.models.FloatplaneInfo import FloatplaneInfo
 from PyFloatplane.models.FullImage import FullImage
 from PyFloatplane.models.Image import Image
+from PyFloatplane.models.LiveStream import LiveStream
 from PyFloatplane.models.Plan import Plan
+from PyFloatplane.models.StreamOfflineInfo import StreamOfflineInfo
 from PyFloatplane.models.Playlist import Playlist
 from PyFloatplane.models.Subscription import Subscription
 from PyFloatplane.models.User import User
