@@ -74,6 +74,9 @@ def showCreator(client, creator, videoLimit=None, commentsPerVideo=None, resolve
 
         tmp_vids = client.getVideosByCreator(creator.id, limit=tmp_limit, fetchAfter=skip_count)
 
+        if len(tmp_vids) == 0:
+            break
+
         for vid in tmp_vids:
             videos.append(vid)
 
