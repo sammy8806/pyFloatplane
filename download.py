@@ -119,7 +119,9 @@ def download_video(client, video, commentLimit=None, displayDownloadLink=None):
         print('This video is already downloaded ... skipping')
 
         for ending in [ending_video, ending_info, ending_thumb]:
-            os.chmod('{}/{}.{}'.format(dl_dir, basename, ending), dl_file_perms)
+            f_name = '{}/{}.{}'.format(dl_dir, basename, ending)
+            if os.path.isfile(f_name):
+                os.chmod(f_name, dl_file_perms)
 
         return
 
@@ -149,7 +151,9 @@ def download_video(client, video, commentLimit=None, displayDownloadLink=None):
         ydl.download([download_url])
 
         for ending in [ending_video, ending_info]:
-            os.chmod('{}/{}.{}'.format(dl_dir, basename, ending), dl_file_perms)
+            f_name = '{}/{}.{}'.format(dl_dir, basename, ending)
+            if os.path.isfile(f_name):
+                os.chmod(f_name, dl_file_perms)
 
 
 try:
