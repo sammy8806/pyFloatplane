@@ -16,7 +16,7 @@ import youtube_dl
 log = logging.getLogger('Floatplane')
 
 
-def read_dl_config(filename = 'floatplane-dl.ini', path = '.'):
+def read_dl_config(filename = 'floatplane.ini', path = '.'):
     try:
         config = configparser.ConfigParser()
         config.read('{}/{}'.format(path, filename))
@@ -87,11 +87,13 @@ def download_video(client, video, commentLimit=None, displayDownloadLink=None):
 
     cfg_subfolder = 'creator_subfolder'
     cfg_path = 'target_path'
-    cfg_perm = 'target_path_permissions'
+    cfg_dir_perm = 'target_path_permissions'
+    cfg_file_perm = 'dl_file_permissions'
 
     config = read_dl_config()
     dl_dir = config[cfg_path] if cfg_path in config else 'download'
-    dl_perms = int(config[cfg_perm], base=8) if cfg_perm in config else 0o755
+    dl_dir_perms = int(config[cfg_dir_perm], base=8) if cfg_dir_perm in config else 0o755
+    dl_file_perms = int(config[cfg_file_perm], base=8) if cfg_file_perm in config else 0o644
 
     val_subfolder = config[cfg_subfolder].strip().lower()
     if val_subfolder == 'true' or val_subfolder == '1':
@@ -100,17 +102,25 @@ def download_video(client, video, commentLimit=None, displayDownloadLink=None):
         dl_dir = '{}/{}'.format(dl_dir, creator_short)
 
     if not os.path.isdir(dl_dir):
-        os.mkdir(dl_dir, dl_perms)
+        os.mkdir(dl_dir, dl_dir_perms)
 
     download_url = client.getDirectVideoURL(video.guid)
     creator = client.getCreatorInfo(video.creator.id)[0]
 
+    ending_video = 'mp4'
+    ending_thumb = 'png'
+    ending_info = 'info.json'
     basename = '{}-{}-{}'.format(video.guid, creator.title, video.title)
-    output_template = '{}/{}.mp4'.format(dl_dir, basename)
-    thumbnail_template = '{}/{}.png'.format(dl_dir, basename)
+
+    output_template = '{}/{}.{}'.format(dl_dir, basename, ending_video)
+    thumbnail_template = '{}/{}.{}'.format(dl_dir, basename, ending_thumb)
 
     if os.path.exists(output_template):
         print('This video is already downloaded ... skipping')
+
+        for ending in [ending_video, ending_info, ending_thumb]:
+            os.chmod('{}/{}.{}'.format(dl_dir, basename, ending), dl_file_perms)
+
         return
 
     if os.path.exists('{}.part'.format(output_template)):
@@ -118,7 +128,7 @@ def download_video(client, video, commentLimit=None, displayDownloadLink=None):
 
     print('Downloading Video from: {} to {}'.format(download_url, dl_dir))
 
-    download_thumbnail(client, video, thumbnail_template, perm=dl_perms)
+    download_thumbnail(client, video, thumbnail_template, perm=dl_file_perms)
 
     ydl_opts = {
         'format': 'bestaudio/best',
@@ -138,8 +148,8 @@ def download_video(client, video, commentLimit=None, displayDownloadLink=None):
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         ydl.download([download_url])
 
-    os.chmod(output_template, dl_perms)
-    os.chmod('{}.info.json'.format(output_template), dl_perms)
+        for ending in [ending_video, ending_info]:
+            os.chmod('{}/{}.{}'.format(dl_dir, basename, ending), dl_file_perms)
 
 
 try:
@@ -184,7 +194,7 @@ try:
                 print('\n----- Playlists -----')
                 showCreatorPlaylists(client, creator)
                 print('\n----- Videos -----')
-                showCreator(client, creator, showVideoFunc=download_video, displayDownloadLink=True, videoLimit=1)
+                showCreator(client, creator, showVideoFunc=download_video, displayDownloadLink=True, videoLimit=2)
                 print('\n-----------------------------\n')
 
 except KeyboardInterrupt:
