@@ -135,7 +135,7 @@ def download_video(client, video, commentLimit=None, displayDownloadLink=None):
         'call_home': False,
         'outtmpl': output_template,
         'continue_dl': True,
-        'writeinfojson': True,
+        #'writeinfojson': True,
         #'postprocessors': [{
             # 'key': 'FFmpegExtractAudio',
             # 'preferredcodec': 'mp3',
