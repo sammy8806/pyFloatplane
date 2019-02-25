@@ -83,11 +83,21 @@ def download_thumbnail(client, video, file_name):
 def download_video(client, video, commentLimit=None, displayDownloadLink=None):
     showVideo(client, video, 0, False)
 
+    cfg_subfolder = 'creator_subfolder'
+    cfg_path = 'target_path'
+    cfg_perm = 'target_path_permissions'
+
     config = read_dl_config()
-    dl_dir = config['target_path'] if 'target_path' in config else 'download'
+    dl_dir = config[cfg_path] if cfg_path in config else 'download'
+
+    val_subfolder = config[cfg_subfolder].strip().lower()
+    if val_subfolder == 'true' or val_subfolder == '1':
+        creator = client.getCreatorInfo(video.creator.id)
+        creator_short = creator[0].urlname
+        dl_dir = '{}/{}'.format(dl_dir, creator_short)
 
     if not os.path.isdir(dl_dir):
-        dl_perms = config['target_path_permissions'] if 'target_path_permissions' in config else 0o755
+        dl_perms = int(config[cfg_perm], base=8) if cfg_perm in config else 0o755
         os.mkdir(dl_dir, dl_perms)
 
     download_url = client.getDirectVideoURL(video.guid)
@@ -104,7 +114,7 @@ def download_video(client, video, commentLimit=None, displayDownloadLink=None):
     if os.path.exists('{}.part'.format(output_template)):
         print('Download seems to be interrupted ... continuing')
 
-    print('Downloading Video from: {}'.format(download_url))
+    print('Downloading Video from: {} to {}'.format(download_url, dl_dir))
 
     download_thumbnail(client, video, thumbnail_template)
 
