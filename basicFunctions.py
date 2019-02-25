@@ -19,7 +19,7 @@ def showVideoComments(client, video, limit=None):
             ))
 
 
-def showVideo(client, video, commentLimit=None, displayDownloadLink=False):
+def showVideo(client, video, commentLimit=None, displayDownloadLink=False, showRelatedVideos=False):
     try:
         print('Video: [{}] {}'.format(video.guid, video.title))
         print('ReleaseDate: {}'.format(client.getVideoInfo(video.guid).releaseDate.strftime("%d.%m.%Y %H:%M:%S")))
@@ -28,10 +28,11 @@ def showVideo(client, video, commentLimit=None, displayDownloadLink=False):
 
         print('Related videos:')
 
-        related = client.getReleatedVideos(video.guid)
-        for vid in related:
-            creator = client.getCreatorInfo(vid.creator.id)
-            print('-> [{}][{}] {}'.format(creator[0].title, vid.guid, vid.title))
+        if showRelatedVideos:
+            related = client.getReleatedVideos(video.guid)
+            for vid in related:
+                creator = client.getCreatorInfo(vid.creator.id)
+                print('-> [{}][{}] {}'.format(creator[0].title, vid.guid, vid.title))
 
         print()
 
