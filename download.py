@@ -37,6 +37,7 @@ def read_dl_config(filename = 'floatplane.ini', path = '.'):
 
 
 # logging.basicConfig(format=LOG_FORMAT, level=0)
+logging.basicConfig(level=0)
 
 class MyLogger(object):
     def debug(self, msg):
@@ -193,9 +194,10 @@ try:
         print('Trying to reconnect account to forum')
         client.refreshUserConnection()
     else:
+        creators = client.getCreatorInfo([sub.creator.id for sub in subscriptions])
         for sub in subscriptions:
             print('Subscription: {} ({} {})'.format(sub.plan.title, sub.plan.price, sub.plan.currency))
-            creators = client.getCreatorInfo(sub.creator.id)
+            # creators = client.getCreatorInfo(sub.creator.id)
 
             for creator in creators:
                 print('\n----- Playlists -----')
