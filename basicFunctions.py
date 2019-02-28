@@ -73,7 +73,7 @@ def showCreator(client, creator, videoLimit=None, commentsPerVideo=None, resolve
     while skip_count < videoLimit:
         tmp_limit = videoLimit if videoLimit <= MAX_VIDEO_FETCH_COUNT else videoLimit - skip_count if videoLimit - skip_count <= MAX_VIDEO_FETCH_COUNT else MAX_VIDEO_FETCH_COUNT
 
-        tmp_vids = client.getVideosByCreator(creator.id, limit=tmp_limit, fetchAfter=skip_count)
+        tmp_vids = client.getVideosByCreator(creator.id, limit=None if skip_count > 0 and tmp_limit == MAX_VIDEO_FETCH_COUNT else tmp_limit, fetch_after=skip_count)
 
         if len(tmp_vids) == 0:
             break
@@ -81,7 +81,7 @@ def showCreator(client, creator, videoLimit=None, commentsPerVideo=None, resolve
         for vid in tmp_vids:
             videos.append(vid)
 
-        skip_count = skip_count + tmp_limit
+        skip_count = skip_count + len(tmp_vids)
 
     if videos is None:
         print('No videos found for creator {}'.format(creator.title))
