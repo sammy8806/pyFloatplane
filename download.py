@@ -197,14 +197,13 @@ try:
         creators = client.getCreatorInfo([sub.creator.id for sub in subscriptions])
         for sub in subscriptions:
             print('Subscription: {} ({} {})'.format(sub.plan.title, sub.plan.price, sub.plan.currency))
-            # creators = client.getCreatorInfo(sub.creator.id)
 
-            for creator in creators:
-                print('\n----- Playlists -----')
-                showCreatorPlaylists(client, creator)
-                print('\n----- Videos -----')
-                showCreator(client, creator, showVideoFunc=download_video, displayDownloadLink=True, videoLimit=video_limit)
-                print('\n-----------------------------\n')
+        for creator in creators:
+            print('\n----- Playlists -----')
+            showCreatorPlaylists(client, creator)
+            print('\n----- Videos -----')
+            showCreator(client, creator, showVideoFunc=download_video, displayDownloadLink=True, videoLimit=video_limit)
+            print('\n-----------------------------\n')
 
 except KeyboardInterrupt:
     print()
