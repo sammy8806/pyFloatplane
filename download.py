@@ -37,7 +37,7 @@ def read_dl_config(filename = 'floatplane.ini', path = '.'):
 
 
 # logging.basicConfig(format=LOG_FORMAT, level=0)
-logging.basicConfig(level=0)
+# logging.basicConfig(level=0)
 
 class MyLogger(object):
     def debug(self, msg):
@@ -105,7 +105,6 @@ def download_video(client, video, commentLimit=None, displayDownloadLink=None):
     if not os.path.isdir(dl_dir):
         os.mkdir(dl_dir, dl_dir_perms)
 
-    download_url = client.getDirectVideoURL(video.guid)
     creator = client.getCreatorInfo(video.creator.id)[0]
 
     ending_video = 'mp4'
@@ -129,6 +128,7 @@ def download_video(client, video, commentLimit=None, displayDownloadLink=None):
     if os.path.exists('{}.part'.format(output_template)):
         print('Download seems to be interrupted ... continuing')
 
+    download_url = client.getDirectVideoURL(video.guid)
     print('Downloading Video from: {} to {}'.format(download_url, dl_dir))
 
     download_thumbnail(client, video, thumbnail_template, perm=dl_file_perms)

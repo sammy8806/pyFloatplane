@@ -19,7 +19,7 @@ def showVideoComments(client, video, limit=None):
             ))
 
 
-def showVideo(client, video, commentLimit=None, displayDownloadLink=False, showRelatedVideos=False):
+def showVideo(client, video, commentLimit=None, displayDownloadLink=False, showRelatedVideos=False, showComments=False):
     try:
         print('Video: [{}] {}'.format(video.guid, video.title))
         print('ReleaseDate: {}'.format(client.getVideoInfo(video.guid).releaseDate.strftime("%d.%m.%Y %H:%M:%S")))
@@ -36,7 +36,8 @@ def showVideo(client, video, commentLimit=None, displayDownloadLink=False, showR
 
         print()
 
-        showVideoComments(client, video, commentLimit)
+        if showComments:
+            showVideoComments(client, video, commentLimit)
     except Exception as e:
         print('Ignoring video')
         print(e)
