@@ -22,7 +22,7 @@ cfg_file_perm = 'dl_file_permissions'
 cfg_video_limit = 'video_count'
 
 
-def read_dl_config(filename = 'floatplane.ini', path = '.'):
+def read_dl_config(filename='floatplane.ini', path='.'):
     try:
         config = configparser.ConfigParser()
         config.read('{}/{}'.format(path, filename))
@@ -53,14 +53,14 @@ class MyLogger(object):
 def download_progress_hook(d):
     if d['status'] == 'downloading':
         print('[{}] {} / {:.2f} MB'.format(
-            d['filename'], d['_percent_str'], d['total_bytes']/1024/1024)
+            d['filename'], d['_percent_str'], d['total_bytes'] / 1024 / 1024)
         )
 
     if d['status'] == 'finished':
         print('Done downloading, now converting ...')
 
 
-def download_thumbnail(client, video, file_name, perm = 0o775):
+def download_thumbnail(client, video, file_name, perm=0o775):
     if video.thumbnail is None:
         log.debug('No Thumbnail seems attached to {} ... skipping'.format(video.guid))
         return
@@ -89,28 +89,32 @@ def download_thumbnail(client, video, file_name, perm = 0o775):
     log.debug('Thumbnail successfully downloaded')
 
 
-def download_video(client, video, commentLimit=None, displayDownloadLink=None):
+def download_video(client, video, commentLimit=None, displayDownloadLink=None, creator=None):
     showVideo(client, video, 0, False)
 
     dl_dir = dl_config[cfg_path] if cfg_path in dl_config else 'download'
     dl_dir_perms = int(dl_config[cfg_dir_perm], base=8) if cfg_dir_perm in dl_config else 0o755
     dl_file_perms = int(dl_config[cfg_file_perm], base=8) if cfg_file_perm in dl_config else 0o644
 
+    if creator is None:
+        creator = client.getCreatorInfo(video.creator.id)[0]
+
     val_subfolder = dl_config[cfg_subfolder].strip().lower()
     if val_subfolder == 'true' or val_subfolder == '1':
-        creator = client.getCreatorInfo(video.creator.id)
-        creator_short = creator[0].urlname
+        creator_short = creator.urlname
         dl_dir = '{}/{}'.format(dl_dir, creator_short)
 
     if not os.path.isdir(dl_dir):
         os.mkdir(dl_dir, dl_dir_perms)
 
-    creator = client.getCreatorInfo(video.creator.id)[0]
-
     ending_video = 'mp4'
     ending_thumb = 'png'
     ending_info = 'info.json'
     basename = '{}-{}-{}'.format(video.guid, creator.title, video.title)
+
+    if os.name == 'nt':
+        # Avoiding NTFS alternative file streams
+        basename = basename.replace(':', '')
 
     output_template = '{}/{}.{}'.format(dl_dir, basename, ending_video)
     thumbnail_template = '{}/{}.{}'.format(dl_dir, basename, ending_thumb)
@@ -138,12 +142,12 @@ def download_video(client, video, commentLimit=None, displayDownloadLink=None):
         'call_home': False,
         'outtmpl': output_template,
         'continue_dl': True,
-        #'writeinfojson': True,
-        #'postprocessors': [{
-            # 'key': 'FFmpegExtractAudio',
-            # 'preferredcodec': 'mp3',
-            # 'preferredquality': '192',
-        #}],
+        # 'writeinfojson': True,
+        # 'postprocessors': [{
+        # 'key': 'FFmpegExtractAudio',
+        # 'preferredcodec': 'mp3',
+        # 'preferredquality': '192',
+        # }],
         'logger': MyLogger(),
         'progress_hooks': [download_progress_hook],
     }
@@ -199,6 +203,11 @@ try:
             print('Subscription: {} ({} {})'.format(sub.plan.title, sub.plan.price, sub.plan.currency))
 
         for creator in creators:
+            creator_title = '----- {} -----'.format(creator.title)
+            print('\n' + '-' * len(creator_title))
+            print(creator_title)
+            print('-' * len(creator_title))
+
             print('\n----- Playlists -----')
             showCreatorPlaylists(client, creator)
             print('\n----- Videos -----')

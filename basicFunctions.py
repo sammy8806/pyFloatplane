@@ -1,5 +1,7 @@
-MAX_VIDEO_FETCH_COUNT = 20
+import logging
 
+MAX_VIDEO_FETCH_COUNT = 20
+log = logging.getLogger('Floatplane')
 
 def showVideoComments(client, video, limit=None):
     for comment in client.getVideoComments(video.guid, limit):
@@ -74,7 +76,9 @@ def showCreator(client, creator, videoLimit=None, commentsPerVideo=None, resolve
     while skip_count < videoLimit:
         tmp_limit = videoLimit if videoLimit <= MAX_VIDEO_FETCH_COUNT else videoLimit - skip_count if videoLimit - skip_count <= MAX_VIDEO_FETCH_COUNT else MAX_VIDEO_FETCH_COUNT
 
-        tmp_vids = client.getVideosByCreator(creator.id, limit=None if skip_count > 0 and tmp_limit == MAX_VIDEO_FETCH_COUNT else tmp_limit, fetch_after=skip_count)
+        limit = None if skip_count > 0 and tmp_limit == MAX_VIDEO_FETCH_COUNT else tmp_limit
+        log.info('Getting videos for {} {} -> {}'.format(creator.title, skip_count, skip_count + (limit if limit is not None else 0)))
+        tmp_vids = client.getVideosByCreator(creator.id, limit=limit, fetch_after=skip_count)
 
         if len(tmp_vids) == 0:
             break
@@ -90,7 +94,7 @@ def showCreator(client, creator, videoLimit=None, commentsPerVideo=None, resolve
         for video in videos:
             print()
             if showVideoFunc:
-                showVideoFunc(client, video, commentLimit=commentsPerVideo, displayDownloadLink=displayDownloadLink)
+                showVideoFunc(client, video, creator=creator, commentLimit=commentsPerVideo, displayDownloadLink=displayDownloadLink)
 
 
 def showEdgeSelection(client):
