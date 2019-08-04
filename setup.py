@@ -11,7 +11,7 @@ setuptools.setup(
     description='Unofficial REST-Client bindings for Floatplane.com',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://git.dark-it.net/stappert/pyFloatpane',
+    url='https://git.dark-it.net/stappert/pyFloatplane',
     keywords='floatplane floatplanemedia rest-client linustechtips linusmedia videos',
     project_urls={
         'Floatplane': 'https://floatplane.com',
