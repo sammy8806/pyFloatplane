@@ -105,17 +105,22 @@ def download_video(client, video, commentLimit=None, displayDownloadLink=None, c
         dl_dir = '{}/{}'.format(dl_dir, creator_short)
 
     if not os.path.isdir(dl_dir):
-        os.mkdir(dl_dir, dl_dir_perms)
+        os.makedirs(dl_dir, mode=dl_dir_perms, exist_ok=True)
 
     ending_video = 'mp4'
     ending_thumb = 'png'
     ending_info = 'info.json'
     basename = '{}-{}-{}'.format(video.guid, creator.title, video.title)
 
-    basename = basename.replace('/', '')
+    # Remove chars not allowed for any os/fs
+    basename = basename.replace('/', '').replace('\\', '').replace('*', '').replace('"', '').replace('<', '') \
+        .replace('>', '').replace('|', '')
+
     if os.name == 'nt':
         # Avoiding NTFS alternative file streams
         basename = basename.replace(':', '')
+        # Removed not allowed windows chars
+        basename = basename.replace('?', '')
 
     output_template = '{}/{}.{}'.format(dl_dir, basename, ending_video)
     thumbnail_template = '{}/{}.{}'.format(dl_dir, basename, ending_thumb)
