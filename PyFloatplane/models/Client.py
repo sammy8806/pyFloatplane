@@ -1,6 +1,6 @@
 class Client:
     def __init__(self, ip=None, country_code=None, country_name=None, region_code=None, region_name=None,
-                 city=None, zip_code=None, time_zone=None, latitude = 0.0, longitude=0.0, metro_code=0):
+                 city=None, zip_code=None, time_zone=None, latitude=0.0, longitude=0.0, metro_code=0):
         self.ip = ip  # String : IPv4/IPv6
         self.country_code = country_code  # String : [DE]
         self.country_name = country_name  # String : [Germany]

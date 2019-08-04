@@ -12,6 +12,7 @@ from PyFloatplane.annotations import memorize
 from PyFloatplane.models import *
 
 log = logging.getLogger('Floatplane')
+logging.basicConfig(level=logging.DEBUG, format="%(message)s")
 
 
 class FloatplaneClient:
@@ -404,7 +405,7 @@ class FloatplaneClient:
 
     # GET /video/url?guid=00nU1J5UfP&quality=1080
     @memorize('videoURL')
-    def getVideoURL(self, videoId, quality=1080, is_download = None, is_stream = True):
+    def getVideoURL(self, videoId, quality=1080, is_download=None, is_stream=True):
         path = '/video/url?guid={}&quality={}'.format(videoId, quality)
         req = self.requestApi(path, headers={
             'Referer': 'https://www.floatplane.com/video/{}'.format(videoId)
@@ -425,7 +426,9 @@ class FloatplaneClient:
         template_uri = 'https://' + edge_server.hostname + cdn_info.resource.uri
         quality_level = sorted(cdn_info.resource.data.qualityLevels, key=lambda obj: obj.order, reverse=True)
         selected_quality_level = quality_level[0] if len(quality_level) > 0 else '1080p'
-        response = template_uri.replace('{qualityLevels}', selected_quality_level.name).replace('{token}', cdn_info.resource.data.token)
+
+        response = template_uri.replace('{qualityLevels}', selected_quality_level.name)
+        response = response.replace('{token}', cdn_info.resource.data.token)
 
         return response
 
@@ -525,10 +528,11 @@ class FloatplaneClient:
 
         return cdn_delivery
 
-    def getTargetEdgeServer(self, guid=None, allowDownload = True, allowStreaming = None):
+    def getTargetEdgeServer(self, guid=None, allowDownload=True, allowStreaming=None):
 
         target_type = 'vod' if allowStreaming else 'download' if allowDownload else None
-        edge_info = self.getEdges() if guid is None or target_type is None else self.getCdnDelivery(guid=guid, type=target_type)
+        edge_info = self.getEdges() if guid is None or target_type is None else self.getCdnDelivery(guid=guid,
+                                                                                                    type=target_type)
 
         def approx_distance(source_long, source_lat, target_long, target_lat):
             """
