@@ -168,20 +168,26 @@ def download_video(client, video, commentLimit=None, displayDownloadLink=None, c
 
 
 try:
+    print('Reading Config ...')
     dl_config = read_dl_config()
     video_limit = int(dl_config[cfg_video_limit]) if cfg_video_limit in dl_config else 5
 
     client = FloatplaneClient()
     username, password = client.loadCredentials()
+
+    print('Logging in as "{}"'.format(username))
     loggedInUser = client.login(username, password)
     if not loggedInUser:
         raise Exception('User login not valid')
+    print('Successfully logged in')
 
     print('Searching for Edges ...')
     edgeInfo = client.getEdges()
 
     print('Searching for Creators ...')
     creators = client.getCreatorList()
+
+    # client.getVideoURL('wBkla5faBo', is_download=True, is_stream=False)
 
     if creators is None:
         print('No creators creators found')
