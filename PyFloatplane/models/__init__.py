@@ -1,5 +1,6 @@
-
 from PyFloatplane.models.Activity import Activity
+from PyFloatplane.models.CdnDelivery import CdnDelivery, CdnDeliveryResource, CdnDeliveryResourceData, \
+    CdnDeliveryQualityLevel
 from PyFloatplane.models.Client import Client
 from PyFloatplane.models.Comment import Comment
 from PyFloatplane.models.CommentInteraction import CommentInteraction
