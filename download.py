@@ -112,6 +112,7 @@ def download_video(client, video, commentLimit=None, displayDownloadLink=None, c
     ending_info = 'info.json'
     basename = '{}-{}-{}'.format(video.guid, creator.title, video.title)
 
+    basename = basename.replace('/', '')
     if os.name == 'nt':
         # Avoiding NTFS alternative file streams
         basename = basename.replace(':', '')
