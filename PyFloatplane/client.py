@@ -29,6 +29,7 @@ class FloatplaneClient:
 
         self.fpCookies = fpCookies
         self.lmgCookies = lmgCookies
+        self.__req_session = None
 
         self.loggedIn = False
 
@@ -68,7 +69,10 @@ class FloatplaneClient:
         if target is None:
             target = self.fpTarget
 
-        req = requests.request(method, target + path, data=params, cookies=cookies, headers=headers)
+        if self.__req_session is None:
+            self.__req_session = requests.Session()
+
+        req = self.__req_session.request(method, target + path, data=params, cookies=cookies, headers=headers)
 
         if req.status_code == 404:
             raise Exception('{}: {} # {} not found!'.format(method, path, params))
