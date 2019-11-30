@@ -39,6 +39,7 @@ def read_dl_config(filename='floatplane.ini', path='.'):
 # logging.basicConfig(format=LOG_FORMAT, level=0)
 # logging.basicConfig(level=0)
 
+
 class MyLogger(object):
     def debug(self, msg):
         pass

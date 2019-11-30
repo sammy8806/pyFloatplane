@@ -12,7 +12,7 @@ from PyFloatplane.annotations import memorize
 from PyFloatplane.models import *
 
 log = logging.getLogger('Floatplane')
-logging.basicConfig(level=logging.DEBUG, format="%(message)s")
+#logging.basicConfig(level=logging.DEBUG, format="%(message)s")
 
 
 class FloatplaneClient:

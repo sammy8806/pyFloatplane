@@ -1,9 +1,12 @@
 class Plan:
-    def __init__(self, title=None, description=None, price=0.0, currency=None,
+    def __init__(self, id=None, title=None, description=None, price=0.0, priceYearly=0.0, currency=None,
                  interval=None, intervalCount=0, logo=None):
+
+        self.id = id
         self.title = title  # String
         self.description = description  # String
         self.price = price  # Double
+        self.priceYearly = float(priceYearly)  # Double
         self.currency = currency  # String [cad, usd?, eur?]
         self.interval = interval  # String [month, year?]
         self.intervalCount = intervalCount  # Int // Every x months ?
@@ -14,5 +17,9 @@ class Plan:
         if source is None or len(source) is 0:
             return Plan()
 
-        return Plan(source['title'], source['description'], source['price'], source['currency'],
-                    source['interval'], source['intervalCount'], source['logo'])
+        plan = Plan()
+
+        for attr in source:
+            setattr(plan, attr, source[attr])
+
+        return plan

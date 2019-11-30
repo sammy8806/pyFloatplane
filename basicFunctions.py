@@ -25,7 +25,10 @@ def showVideoComments(client, video, limit=None):
 def showVideo(client, video, commentLimit=None, displayDownloadLink=False, showRelatedVideos=False, showComments=False):
     try:
         print('Video: [{}] {}'.format(video.guid, video.title))
-        print('ReleaseDate: {}'.format(client.getVideoInfo(video.guid).releaseDate.strftime("%d.%m.%Y %H:%M:%S")))
+        videoInfo = client.getVideoInfo(video.guid)
+        if hasattr(videoInfo, 'releaseDate'):
+            print('ReleaseDate: {}'.format(videoInfo.releaseDate.strftime("%d.%m.%Y %H:%M:%S")))
+
         if displayDownloadLink:
             print('Link: {}'.format(client.getDirectVideoURL(video.guid)))
 
