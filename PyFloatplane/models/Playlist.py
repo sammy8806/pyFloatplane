@@ -14,7 +14,7 @@ class Playlist:
 	
 	@staticmethod
 	def generate(source):
-		if source is None or len(source) is 0:
+		if source is None or len(source) == 0:
 			return Playlist()
 
 		return Playlist(source['id'], source['title'], source['updatedAt'], source['videoCount'], source['image'])

@@ -16,7 +16,9 @@ class Edge:
 
     @staticmethod
     def generate(source):
-        if source is None or len(source) is 0:
+        if source is None or len(source) == 0:
             return Edge()
 
-        return Edge(source['client'], source['edges'])
+        client = source['client'] if 'client' in source else None
+
+        return Edge(client, source['edges'])

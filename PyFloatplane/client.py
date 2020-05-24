@@ -213,7 +213,7 @@ class FloatplaneClient:
         if limit is not None and limit > 0:
             path += '&limit={}'.format(limit)
 
-        if limit is 0:
+        if limit == 0:
             return comments
 
         json = self.requestApiJson(path)
@@ -534,9 +534,12 @@ class FloatplaneClient:
 
             return distance
 
-        sorted_edges = sorted(edge_info.edges, key=lambda edge: approx_distance(
-            edge.datacenter.longitude, edge.datacenter.latitude,
-            edge_info.client.longitude, edge_info.client.latitude))
+        if edge_info.client is not None:
+            sorted_edges = sorted(edge_info.edges, key=lambda edge: approx_distance(
+                edge.datacenter.longitude, edge.datacenter.latitude,
+                edge_info.client.longitude, edge_info.client.latitude))
+        else:
+            sorted_edges = edge_info.edges
 
         for edge in sorted_edges:
             # allowStreaming = None

@@ -16,7 +16,7 @@ class EdgeServer:
 
     @staticmethod
     def generate(source):
-        if source is None or len(source) is 0:
+        if source is None or len(source) == 0:
             return EdgeServer()
 
         return EdgeServer(

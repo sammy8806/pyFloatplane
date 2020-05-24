@@ -10,7 +10,7 @@ class Activity:
 
 	@staticmethod
 	def generate(source):
-		if source is None or len(source) is 0:
+		if source is None or len(source) == 0:
 			return Activity()
 		if type(source) is str and len(source) > 0:
 			return Activity(id=source)

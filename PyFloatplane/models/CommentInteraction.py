@@ -5,7 +5,7 @@ class CommentInteraction:
 
 	@staticmethod
 	def generate(source):
-		if source is None or type(source) is str and len(source) is 0:
+		if source is None or type(source) is str and len(source) == 0:
 			return CommentInteraction()
 
 		return CommentInteraction(source['like'], source['dislike'])

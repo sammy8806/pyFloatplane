@@ -15,7 +15,7 @@ class Client:
 
     @staticmethod
     def generate(source):
-        if source is None or len(source) is 0:
+        if source is None or len(source) == 0:
             return Client()
 
         return Client(ip=source['ip'], country_code=source['country_code'], country_name=source['country_name'],

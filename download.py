@@ -21,6 +21,8 @@ cfg_dir_perm = 'target_path_permissions'
 cfg_file_perm = 'dl_file_permissions'
 cfg_video_limit = 'video_count'
 
+NT_ILLEGAL_CHARS = '<>:"/\\|*?'
+
 
 def read_dl_config(filename='floatplane.ini', path='.'):
     try:
@@ -113,8 +115,10 @@ def download_video(client, video, commentLimit=None, displayDownloadLink=None, c
     basename = '{}-{}-{}'.format(video.guid, creator.title, video.title)
 
     if os.name == 'nt':
+
         # Avoiding NTFS alternative file streams
-        basename = basename.replace(':', '')
+        for char in NT_ILLEGAL_CHARS:
+            basename = basename.replace(char, '')
 
     output_template = '{}/{}.{}'.format(dl_dir, basename, ending_video)
     thumbnail_template = '{}/{}.{}'.format(dl_dir, basename, ending_thumb)

@@ -5,7 +5,7 @@ from PyFloatplane.models.CommentInteraction import CommentInteraction
 
 class Comment:
     def __init__(self, id=None, user=None, video=None, text=None, replying=None, postDate=None,
-                 editDate=None, interactions=[], replies=[], interactionCounts={}):
+                 editDate=None, interactions=[], replies=[], interactionCounts={}, totalReplies=None):
         if type(user) is dict or type(user) is str or user is None:
             user = User.generate(user)
 
@@ -28,20 +28,29 @@ class Comment:
         self.replying = replying  # String
         self.postDate = postDate  # IsoTimestamp
         self.editDate = editDate  # IsoTimestamp
-        self.interactions = interactions  # ?
+        self.interactions = interactions  # TODO: Deprecated?
         self.replies = replies  # [Comment]
         self.interactionCounts = interactionCounts  # CommentInteraction
+        self.totalReplies = totalReplies  # Int // TODO: Not working yet?
 
     @staticmethod
     def generate(source):
-        if source is None or len(source) is 0:
+        if source is None or len(source) == 0:
             return Comment()
 
         interactions = source['interactions'] if 'interactions' in source else []
         replies = source['replies'] if 'replies' in source else []
 
         return Comment(
-            source['id'], source['user'], source['video'], source['text'], source['replying'],
-            source['postDate'], source['editDate'], interactions, replies,
-            source['interactionCounts']
+            id=source['id'],
+            user=source['user'],
+            video=source['video'],
+            text=source['text'],
+            replying=source['replying'],
+            postDate=source['postDate'],
+            editDate=source['editDate'],
+            interactions=interactions,
+            replies=replies,
+            interactionCounts=source['interactionCounts'],
+            totalReplies=source['totalReplies']
         )

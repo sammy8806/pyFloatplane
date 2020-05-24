@@ -7,7 +7,7 @@ class EdgeDatacenter:
 
     @staticmethod
     def generate(source):
-        if source is None or len(source) is 0:
+        if source is None or len(source) == 0:
             return EdgeDatacenter()
 
         return EdgeDatacenter(source['countryCode'], source['regionCode'], source['latitude'], source['longitude'])
