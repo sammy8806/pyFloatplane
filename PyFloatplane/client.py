@@ -12,6 +12,7 @@ from PyFloatplane.annotations import memorize
 from PyFloatplane.models import *
 
 log = logging.getLogger('Floatplane')
+#logging.basicConfig(level=logging.DEBUG, format="%(message)s")
 
 
 class FloatplaneClient:
@@ -29,6 +30,7 @@ class FloatplaneClient:
 
         self.fpCookies = fpCookies
         self.lmgCookies = lmgCookies
+        self.__req_session = None
 
         self.loggedIn = False
 
@@ -68,7 +70,10 @@ class FloatplaneClient:
         if target is None:
             target = self.fpTarget
 
-        req = requests.request(method, target + path, data=params, cookies=cookies, headers=headers)
+        if self.__req_session is None:
+            self.__req_session = requests.Session()
+
+        req = self.__req_session.request(method, target + path, data=params, cookies=cookies, headers=headers)
 
         if req.status_code == 404:
             raise Exception('{}: {} # {} not found!'.format(method, path, params))
@@ -400,7 +405,7 @@ class FloatplaneClient:
 
     # GET /video/url?guid=00nU1J5UfP&quality=1080
     @memorize('videoURL')
-    def getVideoURL(self, videoId, quality=1080, is_download = None, is_stream = True):
+    def getVideoURL(self, videoId, quality=1080, is_download=None, is_stream=True):
         path = '/video/url?guid={}&quality={}'.format(videoId, quality)
         req = self.requestApi(path, headers={
             'Referer': 'https://www.floatplane.com/video/{}'.format(videoId)
@@ -414,8 +419,16 @@ class FloatplaneClient:
         if is_download is True:
             is_stream = None
 
-        edge_server = self.getTargetEdgeServer(allowDownload=is_download, allowStreaming=is_stream)
-        response = re.sub(r"[\"']*(https?)://.*?/(.*?)[\"']*$", r"\1://{}/\2", response).format(edge_server.hostname)
+        edge_server = self.getTargetEdgeServer(guid=videoId, allowDownload=is_download, allowStreaming=is_stream)
+        target_type = 'vod' if is_stream else 'download' if is_download else None
+        cdn_info = self.getCdnDelivery(guid=videoId, type=target_type)
+
+        template_uri = 'https://' + edge_server.hostname + cdn_info.resource.uri
+        quality_level = sorted(cdn_info.resource.data.qualityLevels, key=lambda obj: obj.order, reverse=True)
+        selected_quality_level = quality_level[0] if len(quality_level) > 0 else '1080p'
+
+        response = template_uri.replace('{qualityLevels}', selected_quality_level.name)
+        response = response.replace('{token}', cdn_info.resource.data.token)
 
         return response
 
@@ -506,9 +519,20 @@ class FloatplaneClient:
 
         return json
 
-    def getTargetEdgeServer(self, allowDownload = True, allowStreaming = None):
+    # GET: https://www.floatplane.com/api/cdn/delivery?type=<download|vod>&guid=XXXX
+    def getCdnDelivery(self, guid, type='download'):
+        path = '/cdn/delivery?type={}&guid={}'.format(type, guid)
+        json = self.requestApiJson(path, method='GET')
 
-        edge_info = self.getEdges()
+        cdn_delivery = CdnDelivery.generate(json)
+
+        return cdn_delivery
+
+    def getTargetEdgeServer(self, guid=None, allowDownload=True, allowStreaming=None):
+
+        target_type = 'vod' if allowStreaming else 'download' if allowDownload else None
+        edge_info = self.getEdges() if guid is None or target_type is None else self.getCdnDelivery(guid=guid,
+                                                                                                    type=target_type)
 
         def approx_distance(source_long, source_lat, target_long, target_lat):
             """

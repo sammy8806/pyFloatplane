@@ -3,7 +3,6 @@ from PyFloatplane.models.Image import Image
 
 class StreamOfflineInfo:
     def __init__(self, title=None, description=None, thumbnail=None):
-
         if type(thumbnail) is dict:
             thumbnail = Image.generate(thumbnail)
 

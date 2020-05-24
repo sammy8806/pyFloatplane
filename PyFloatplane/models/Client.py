@@ -1,16 +1,16 @@
 class Client:
     def __init__(self, ip=None, country_code=None, country_name=None, region_code=None, region_name=None,
-                 city=None, zip_code=None, time_zone=None, latitude = 0.0, longitude=0.0, metro_code=0):
+                 city=None, zip_code=None, time_zone=None, latitude=0.0, longitude=0.0, metro_code=0):
         self.ip = ip  # String : IPv4/IPv6
-        self.country_code = country_code  # String : [US]
-        self.country_name = country_name  # String : [United State]
-        self.region_code = region_code  # String ?
-        self.region_name = region_name  # String ?
-        self.city = city  # String ?
-        self.zip_code = zip_code  # String ?
-        self.time_zone = time_zone  # String ?
-        self.latitude = latitude  # Double
-        self.longitude = longitude  # Double
+        self.country_code = country_code  # String : [DE]
+        self.country_name = country_name  # String : [Germany]
+        self.region_code = region_code  # String : [HH]
+        self.region_name = region_name  # String : [Hamburg]
+        self.city = city  # String : [Hamburg]
+        self.zip_code = zip_code  # String : [22303]
+        self.time_zone = time_zone  # String : [Europe/Berlin]
+        self.latitude = latitude  # Double : [53.5844]
+        self.longitude = longitude  # Double : [10.0288]
         self.metro_code = metro_code  # Int ?
 
     @staticmethod
