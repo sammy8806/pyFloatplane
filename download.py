@@ -12,6 +12,7 @@ from PyFloatplane import FloatplaneClient
 from basicFunctions import showCreator, showVideo, showCreatorPlaylists, showEdgeSelection
 
 import youtube_dl
+import sentry_sdk
 
 log = logging.getLogger('Floatplane')
 
@@ -28,6 +29,10 @@ def read_dl_config(filename='floatplane.ini', path='.'):
     try:
         config = configparser.ConfigParser()
         config.read('{}/{}'.format(path, filename))
+
+        if 'sentry' in config:
+            dsn=config['sentry']['dsn']
+            sentry_sdk.init(dsn=dsn)
 
         if 'download' in config:
             return config['download']
@@ -166,6 +171,7 @@ def download_video(client, video, commentLimit=None, displayDownloadLink=None, c
                     os.chmod(f_name, dl_file_perms)
     except Exception as err:
         print('Download Failed!: {}', err)
+        sentry_sdk.capture_exception(err)
 
 try:
     print('Reading Config ...')
@@ -229,3 +235,7 @@ try:
 except KeyboardInterrupt:
     print()
     print('Aborted by Keystroke!')
+
+except Exception as e:
+    log.critical(e)
+    sentry_sdk.capture_exception(e)
