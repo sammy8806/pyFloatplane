@@ -136,34 +136,36 @@ def download_video(client, video, commentLimit=None, displayDownloadLink=None, c
     if os.path.exists('{}.part'.format(output_template)):
         print('Download seems to be interrupted ... continuing')
 
-    download_url = client.getDirectVideoURL(video.guid)
-    print('Downloading Video from: {} to {}'.format(download_url, dl_dir))
+    try:
+        download_url = client.getDirectVideoURL(video.guid)
+        print('Downloading Video from: {} to {}'.format(download_url, dl_dir))
 
-    download_thumbnail(client, video, thumbnail_template, perm=dl_file_perms)
+        download_thumbnail(client, video, thumbnail_template, perm=dl_file_perms)
 
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'call_home': False,
-        'outtmpl': output_template,
-        'continue_dl': True,
-        # 'writeinfojson': True,
-        # 'postprocessors': [{
-        # 'key': 'FFmpegExtractAudio',
-        # 'preferredcodec': 'mp3',
-        # 'preferredquality': '192',
-        # }],
-        'logger': MyLogger(),
-        'progress_hooks': [download_progress_hook],
-    }
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'call_home': False,
+            'outtmpl': output_template,
+            'continue_dl': True,
+            # 'writeinfojson': True,
+            # 'postprocessors': [{
+            # 'key': 'FFmpegExtractAudio',
+            # 'preferredcodec': 'mp3',
+            # 'preferredquality': '192',
+            # }],
+            'logger': MyLogger(),
+            'progress_hooks': [download_progress_hook],
+        }
 
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([download_url])
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([download_url])
 
-        for ending in [ending_video, ending_info]:
-            f_name = '{}/{}.{}'.format(dl_dir, basename, ending)
-            if os.path.isfile(f_name):
-                os.chmod(f_name, dl_file_perms)
-
+            for ending in [ending_video, ending_info]:
+                f_name = '{}/{}.{}'.format(dl_dir, basename, ending)
+                if os.path.isfile(f_name):
+                    os.chmod(f_name, dl_file_perms)
+    except Exception as err:
+        print('Download Failed!: {}', err)
 
 try:
     print('Reading Config ...')
