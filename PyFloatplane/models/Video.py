@@ -44,6 +44,7 @@ class Video:
             return Video(title=source)
 
         tags = source['tags'] if 'tags' in source else []
+        thumbnail = source['thumbnail'] if 'thumbnail' in source else None
 
         video = Video(
             title=source['title'],
@@ -54,7 +55,7 @@ class Video:
             private=source['private'],
             duration=source['duration'],
             creator=source['creator'],
-            thumbnail=source['thumbnail'],
+            thumbnail=thumbnail,
             subscription_permissions=source['subscriptionPermissions'] if 'subscriptionPermissions' in source else [],
         )
 
