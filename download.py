@@ -119,11 +119,7 @@ def download_video(client, video, commentLimit=None, displayDownloadLink=None, c
     ending_info = 'info.json'
     basename = '{}-{}-{}'.format(video.guid, creator.title, video.title)
 
-    if os.name == 'nt':
-
-        # Avoiding NTFS alternative file streams
-        for char in NT_ILLEGAL_CHARS:
-            basename = basename.replace(char, '')
+    basename = filter_basename(basename)
 
     output_template = '{}/{}.{}'.format(dl_dir, basename, ending_video)
     thumbnail_template = '{}/{}.{}'.format(dl_dir, basename, ending_thumb)
@@ -172,6 +168,17 @@ def download_video(client, video, commentLimit=None, displayDownloadLink=None, c
     except Exception as err:
         print('Download Failed!: {}', err)
         sentry_sdk.capture_exception(err)
+
+
+def filter_basename(basename):
+    # Avoid Directory seperators for every system
+    basename = basename.replace('/', '-')
+    if os.name == 'nt':
+        # Avoiding NTFS alternative file streams
+        for char in NT_ILLEGAL_CHARS:
+            basename = basename.replace(char, '')
+    return basename
+
 
 try:
     print('Reading Config ...')
