@@ -40,6 +40,7 @@ class Comment:
 
         interactions = source['interactions'] if 'interactions' in source else []
         replies = source['replies'] if 'replies' in source else []
+        totalReplies = source['totalReplies'] if 'totalReplies' in source else []
 
         return Comment(
             id=source['id'],
@@ -52,5 +53,5 @@ class Comment:
             interactions=interactions,
             replies=replies,
             interactionCounts=source['interactionCounts'],
-            totalReplies=source['totalReplies']
+            totalReplies=totalReplies
         )

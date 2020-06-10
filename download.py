@@ -68,7 +68,7 @@ def download_progress_hook(d):
 
 
 def download_thumbnail(client, video, file_name, perm=0o775):
-    if video.thumbnail is None:
+    if video.thumbnail is None or video.thumbnail.path is None:
         log.debug('No Thumbnail seems attached to {} ... skipping'.format(video.guid))
         return
 
