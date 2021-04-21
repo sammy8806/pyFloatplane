@@ -34,6 +34,10 @@ class FloatplaneClient:
 
         self.loggedIn = False
 
+        self.fixedHeaders = {
+            'User-Agent': 'PyFloatplane (Sammy8806, +https://github.com/sammy8806/pyFloatplane)'
+        }
+
     def loadCredentials(self, filename='floatplane.ini', path='.'):
         try:
             config = configparser.ConfigParser()
@@ -61,7 +65,7 @@ class FloatplaneClient:
 
         return [username, password]
 
-    def requestApi(self, path, params={}, method='GET', cookieJar=None, target=None, headers=None):
+    def requestApi(self, path, params={}, method='GET', cookieJar=None, target=None, headers={}):
         if cookieJar is None:
             cookies = self.fpCookies
         else:
@@ -73,7 +77,9 @@ class FloatplaneClient:
         if self.__req_session is None:
             self.__req_session = requests.Session()
 
-        req = self.__req_session.request(method, target + path, data=params, cookies=cookies, headers=headers)
+        request_headers = {**headers, **self.fixedHeaders}
+
+        req = self.__req_session.request(method, target + path, data=params, cookies=cookies, headers=request_headers)
 
         if req.status_code == 404:
             raise Exception('{}: {} # {} not found!'.format(method, path, params))

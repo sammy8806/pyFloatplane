@@ -96,8 +96,12 @@ def download_thumbnail(client, video, file_name, perm=0o775):
     log.debug('Thumbnail successfully downloaded')
 
 
-def download_video(client, video, commentLimit=None, displayDownloadLink=None, creator=None):
-    showVideo(client, video, 0, False)
+def download_video(client, video, commentLimit=None, displayDownloadLink=False, creator=None):
+    showVideo(client, video,
+              commentLimit=5,
+              # displayDownloadLink=displayDownloadLink,
+              showRelatedVideos=True,
+              showComments=True)
 
     dl_dir = dl_config[cfg_path] if cfg_path in dl_config else 'download'
     dl_dir_perms = int(dl_config[cfg_dir_perm], base=8) if cfg_dir_perm in dl_config else 0o755
@@ -243,6 +247,6 @@ except KeyboardInterrupt:
     print()
     print('Aborted by Keystroke!')
 
-except Exception as e:
-    log.critical(e)
-    sentry_sdk.capture_exception(e)
+#except Exception as e:
+#    log.critical(e)
+#    sentry_sdk.capture_exception(e)
